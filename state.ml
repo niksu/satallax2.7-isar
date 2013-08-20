@@ -922,7 +922,11 @@ let print_coqsig c =
         (x :: r) ->
 	        print_coqsig_base r;
           if !mkproofterm = Some IsarScript then
-            Printf.fprintf c "typedecl %s\n" x
+            if x <> "i" (*FIXME "$i"="i"*) then
+              (*there's no need to redeclare $i*)
+              (*FIXME to avoid name clashes, could suffix names with something*)
+              Printf.fprintf c "typedecl %s\n" x
+            else ()
           else
 	          if (not (!coq2)) then Printf.fprintf c "Variable %s:SType.\n" x
       | [] -> ()
@@ -940,7 +944,7 @@ let print_coqsig c =
 		                try
                       if !mkproofterm = Some IsarScript then
                         begin
-		                      Printf.fprintf c "const %s :: \"" x;
+		                      Printf.fprintf c "consts %s :: \"" x;
 		                      print_stp_isar c a (* coq_names *) false;
 		                      Printf.fprintf c "\"\n"
                         end
@@ -996,9 +1000,9 @@ let print_coqsig c =
               if !mkproofterm = Some IsarScript then
 	              begin
 	                print_coqsig_hyp r;
-	                Printf.fprintf c "assumes %s :: " x;
+	                Printf.fprintf c "assumes %s : \"" x;
 	                print_pretrm_isar c m coq_names coq_used_names (-1) (-1);
-	                Printf.fprintf c "\n"
+	                Printf.fprintf c "\"\n"
                 end
               else
 	              begin
