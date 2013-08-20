@@ -710,10 +710,10 @@ and print_ex_isar c a m bound =
 let forallbvarnames : (string,string) Hashtbl.t = Hashtbl.create 100;;
 let nexistsbvarnames : (string,string) Hashtbl.t = Hashtbl.create 100;;
 
-let next_fresh_factname : int ref = ref 0
-let get_fresh_factname () =
-  next_fresh_factname := 1 + !next_fresh_factname;
-  "FRESHFACT__" ^ (string_of_int (!next_fresh_factname)) (*FIXME check for name collisions*)
+let next_fresh_name : int ref = ref 0
+let get_fresh_name () =
+  next_fresh_name := 1 + !next_fresh_name;
+  "SOMENAME__" ^ (string_of_int (!next_fresh_name)) (*FIXME check for name collisions*)
 
 let rec countup from for_many acc : int list =
   if for_many = 0 then List.rev acc
@@ -862,7 +862,7 @@ let rec ref_isabellehol1 c r hyp const sp=
             "proof -" in
         let sp' = sp ^ "  " in
         let sp'' = sp' ^ "  " in
-        let fresh_fact_name = get_fresh_factname () in
+        let fresh_fact_name = get_fresh_name () in
         let head =
           match neg_body h1 with
             Some h1' ->
@@ -973,6 +973,7 @@ let rec ref_isabellehol1 c r hyp const sp=
           begin
             match eps with
               | Choice(a) ->
+(*
 	                Printf.fprintf c "%stab_choice " sp;
 	                print_stp_coq c a coq_names true;
 	                Printf.fprintf c " (";
@@ -980,6 +981,22 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                Printf.fprintf c ") %s.\n" h1;
 	                ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
 	                ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
+*)
+
+(*
+    let ?p = "% (X1 :: i). f X1 = eigen__11"
+    have H4 : "(! x. ~ ?p x)" by (rule TSeps[where 'A = "i" and p = ?p, THEN mp], rule impI, insert H2, blast)
+*)
+                  let termname = "?" ^ get_fresh_name ()
+                  in
+	                  Printf.fprintf c "%slet %s = \"" sp termname;
+	                  trm_to_isar c pred (Variables.make ());
+	                  Printf.fprintf c "\"\n";
+	                  Printf.fprintf c "%shave %s : \"! x. ~ %s x\" " sp h1 termname;
+	                  Printf.fprintf c "by (rule TSeps[where 'A = \"";
+	                  print_stp_isar c a true;
+                    Printf.fprintf c "\" and p = %s, THEN mp], rule impI, insert %s, blast)" termname (String.concat " " (List.map snd hyp));
+	                  ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp ^ " ");
               | Name(x,Ar(Ar(a,Prop),_)) ->
 	                Printf.fprintf c "%stab_choice' " sp;
 	                print_stp_coq c a coq_names true;
