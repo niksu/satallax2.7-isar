@@ -654,9 +654,27 @@ let rec ref_isabellehol1 c r hyp const sp=
           Printf.fprintf c "%sthus ?thesis by blast\n" sp';
     | NegConjunction(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
-	        Printf.fprintf c "%stab_nand %s %s.\n" sp (lookup "6" (coqnorm h) hyp) h1;
-	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
-	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
+	        (* Printf.fprintf c "%stab_nand %s %s.\n" sp (lookup "6" (coqnorm h) hyp) h1; *)
+	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" "); *)
+	        (* ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" "); *)
+
+        (*the rest of this is adapted from the handler of tab_or*)
+	      let sp' = "  " ^ sp in
+	      let sp'' = "  " ^ sp' in
+	        Printf.fprintf c "%sfrom %s have False\n" sp (lookup "5" (coqnorm h) hyp);
+          (*FIXME this block copied from the NegAequivalenz case*)
+          Printf.fprintf c "%sproof (rule TNAnd)\n" sp';
+          Printf.fprintf c "%sassume %s : \"" sp'' h1;
+	        trm_to_isar c (coqnorm s) (Variables.make ());
+          Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp'';
+          Printf.fprintf c "%snext\n" sp';
+          Printf.fprintf c "%sassume %s : \"" sp'' h1;
+	        trm_to_isar c (coqnorm t) (Variables.make ());
+          Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const sp'';
+          Printf.fprintf c "%sqed\n" sp';
+          Printf.fprintf c "%sthus ?thesis by blast\n" sp';
     | NegImplication(h,s,t,r1) ->
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
@@ -699,7 +717,8 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        (* Printf.fprintf c "%stab_negall %s %s %s.\n" sp (lookup "11" (coqnorm h) hyp) x h1; *)
 	        Printf.fprintf c "%sfrom %s obtain eigen%s where %s : \"" sp (lookup "11" (coqnorm h) hyp) x h1;
 	        trm_to_isar c (coqnorm s) (Variables.make ());
-	        Printf.fprintf c "\" by (erule TNegAll'[rule_format])\n";
+	        (* Printf.fprintf c "\" by (erule TNegAll'[rule_format])\n"; *)
+	        Printf.fprintf c "\" by blast\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp
     | Exist(h,s,r1,a,m,x) ->
 	      let h1 = get_hyp_name() in
