@@ -748,6 +748,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(POr,m1),m2) ->
+(*FIXME excluding parentheses can lead to parse problems on the Isabelle side
         if ((lp < 19) && (rp < 18)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 19;
@@ -755,6 +756,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 18 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 19;
