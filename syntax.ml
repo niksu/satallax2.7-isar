@@ -292,9 +292,9 @@ let rec print_stp_isar c m p =
   match m with
     | Base x ->
         if x <> "$i" then
-          Printf.fprintf c "%s_ty"(*FIXME suffix hack*) x
+          Printf.fprintf c "%s" x
         else
-          Printf.fprintf c "i"
+          Printf.fprintf c "i"(*FIXME this may clash with a base type that's really called "i"*)
     | Prop ->
         Printf.fprintf c "o"
     | Ar(a,b) ->
