@@ -1084,10 +1084,23 @@ let rec ref_isabellehol1 c r hyp const sp=
 	          match pt with
 		          | True -> 	Printf.fprintf c "%stab_rew_true %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | And -> 	Printf.fprintf c "%stab_rew_and %s %s (" sp h1 h2;
+		          | And ->
+                  (*
+                  Printf.fprintf c "%stab_rew_and %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Or -> 	Printf.fprintf c "%stab_rew_or %s %s (" sp h1 h2;
-				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+                  *)
+                  Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"(op &)\", THEN spec, of \"" sp h2;
+				          trm_to_isar c prefix (Variables.make ());
+                  Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% x y. ~ (x --> ~ y)\", THEN mp, OF eq_and_imp]\n" h1;
+		          | Or ->
+                  (*
+ 	                  Printf.fprintf c "%stab_rew_or %s %s (" sp h1 h2;
+				            (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+                  *)
+                  Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"(op |)\", THEN spec, of \"" sp h2;
+				          trm_to_isar c prefix (Variables.make ());
+                  Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% x y. ((~ x) --> y)\", THEN mp, OF eq_or_imp]\n" h1;
+
 		          | Iff -> 	Printf.fprintf c "%stab_rew_iff %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | Exists(_) ->
@@ -1106,8 +1119,13 @@ let rec ref_isabellehol1 c r hyp const sp=
 				          Printf.fprintf c "%stab_rew_eta %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | Lam(Ar(Prop,Prop),Ap(Ap(Imp,Ap(Ap(Imp,DB(0,Prop)),False)),False)) ->
+                  (*
 				          Printf.fprintf c "%stab_rew_dn %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+                  *)
+                  Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"%% x. ~ ~ x\", THEN spec, of \"" sp h2;
+				          trm_to_isar c prefix (Variables.make ());
+                  Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% x . x\", THEN mp, OF eq_neg_neg_id]\n" h1;
 		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(DB(0,_),DB(2,_)))),(Ap(DB(0,_),DB(1,_)))) ))) )) ->
 				          Printf.fprintf c "%stab_rew_leib1 %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
