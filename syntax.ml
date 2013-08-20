@@ -291,7 +291,10 @@ let rec print_stp_isar c m h p =
 let rec print_stp_isar c m p =
   match m with
     | Base x ->
-        Printf.fprintf c "%s" x
+        if x <> "$i" then
+          Printf.fprintf c "%s_ty"(*FIXME suffix hack*) x
+        else
+          Printf.fprintf c "i"
     | Prop ->
         Printf.fprintf c "o"
     | Ar(a,b) ->
