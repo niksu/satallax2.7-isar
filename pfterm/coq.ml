@@ -704,7 +704,14 @@ let rec ref_isabellehol1 c r hyp const sp=
     | Exist(h,s,r1,a,m,x) ->
 	      let h1 = get_hyp_name() in
 	      let x = ( Hashtbl.find coq_names x ) in
-	        Printf.fprintf c "%stab_ex %s %s %s.\n" sp (lookup "12" (coqnorm h) hyp) x h1;
+	        (* Printf.fprintf c "%stab_ex %s %s %s.\n" sp (lookup "12" (coqnorm h) hyp) x h1; *)
+	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp *)
+
+    (* from H4 obtain eigen__1 where H5 : "rel_d eigen__0 eigen__1" by (erule TEx)   *)
+
+	        Printf.fprintf c "%sfrom %s obtain eigen%s where %s : \"" sp (lookup "12" (coqnorm h) hyp) x h1;
+	        trm_to_isar c (coqnorm s) (Variables.make ());
+	        Printf.fprintf c "\" by (erule TEx)\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp
     | NegExist(h,s,r1,a,m,n) ->
 	      let const = add_fresh_const c const n sp in
@@ -949,7 +956,10 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
     | DoubleNegation(h,s,r1) ->
 	      let h1 = get_hyp_name() in
-	        Printf.fprintf c "%stab_dn %s %s.\n" sp (lookup "27" (coqnorm h) hyp) h1;
+	        (* Printf.fprintf c "%stab_dn %s %s.\n" sp (lookup "27" (coqnorm h) hyp) h1; *)
+	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp; *)
+
+	        Printf.fprintf c "%snote %s = notnotD[OF %s]\n" sp h1 (lookup "27" (coqnorm h) hyp);
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp;
     | Rewrite(prefix,pt,pt',r1) ->
 	      let h =  coqnorm (Ap(prefix,pt)) in
