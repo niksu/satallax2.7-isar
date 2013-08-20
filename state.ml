@@ -1056,9 +1056,11 @@ let print_coqsig c =
 	                print_pretrm_isar c m coq_names coq_used_names (-1) (-1);
 	                Printf.fprintf c "\"\n";
 
+(*
                   (*FIXME currently all definitions are unfolded, irrespective of whether when they're used. This seems to reflect Satallax's usage anyway.*)
                   if List.length !coqsig_def > 0 then
 	                  Printf.fprintf c "unfolding %s\n" (String.concat " " (List.map (fun (s, _) -> s ^ "_def") !coqsig_def))
+*)
 	              end
               else
 	              begin

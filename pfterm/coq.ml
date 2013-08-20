@@ -966,9 +966,38 @@ let rec ref_isabellehol1 c r hyp const sp=
     | NegEqualProp(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
+          (*
 	        Printf.fprintf c "%stab_be %s %s %s.\n" sp (lookup "21" (coqnorm h) hyp) h1 h2;
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm (neg t),h2)::hyp) const (sp^" ");
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const (sp^" ");
+          *)
+
+(* from TBE[THEN mp, OF H5] have False *)
+(* proof *)
+
+        (*FIXME wrt DRY principle: copied from NegAequivalenz*)
+	      let sp' = "  " ^ sp in
+	      let sp'' = "  " ^ sp' in
+	        Printf.fprintf c "%sfrom TBE[rule_format, OF %s] have False\n" sp (lookup "23" (coqnorm h) hyp);
+	        Printf.fprintf c "%sproof\n" sp;
+	        Printf.fprintf c "%sassume %s : \"" sp' h1;
+	        trm_to_isar c s (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        Printf.fprintf c "%s and %s : \"" sp' h2;
+	        trm_to_isar c (neg t) (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm (neg t),h2)::hyp) const sp'';
+	        Printf.fprintf c "%snext\n" sp';
+
+	        Printf.fprintf c "%sassume %s : \"" sp' h1;
+	        trm_to_isar c (neg s) (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        Printf.fprintf c "%s and %s : \"" sp' h2;
+	        trm_to_isar c t (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const sp'';
+          Printf.fprintf c "%sqed\n" sp';
+          Printf.fprintf c "%sthus ?thesis by blast\n" sp';
     | EqualProp(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
@@ -1015,11 +1044,13 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm (neg t),h2)::hyp) const (sp^" ");
     | NegEqualFunc(h,s,r1) ->
 	      let h1 = get_hyp_name() in
-	        Printf.fprintf c "%stab_fe %s %s.\n" sp (lookup "25" (coqnorm h) hyp) h1;
+	        (* Printf.fprintf c "%stab_fe %s %s.\n" sp (lookup "25" (coqnorm h) hyp) h1; *)
+	        Printf.fprintf c "%snote %s = TFE[THEN mp, OF %s]\n" sp h1 (lookup "25" (coqnorm h) hyp);
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp
     | EqualFunc(h,s,r1) ->
 	      let h1 = get_hyp_name() in
-	        Printf.fprintf c "%stab_fq %s %s.\n" sp (lookup "26" (coqnorm h) hyp) h1;
+	        (* Printf.fprintf c "%stab_fq %s %s.\n" sp (lookup "26" (coqnorm h) hyp) h1; *)
+	        Printf.fprintf c "%snote %s = TFQ[THEN mp, OF %s]\n" sp h1 (lookup "26" (coqnorm h) hyp);
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const  sp
     | ChoiceR(eps,pred,s,t,r1,r2) ->
         let const = add_fresh_const c const pred sp in
@@ -1143,7 +1174,8 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r1 ((s,h2)::hyp) const sp
     | Delta(h,s,x,r1) ->
 	      let h1 = (lookup "29" (coqnorm h) hyp) in
-	        Printf.fprintf c "%sunfold %s in %s.\n" sp ( Hashtbl.find coq_names x ) h1;
+	        (* Printf.fprintf c "%sunfold %s in %s.\n" sp ( Hashtbl.find coq_names x ) h1; *)
+	        Printf.fprintf c "%snote %s = %s[unfolded %s_def]\n" sp h1 h1 (Hashtbl.find coq_names x);
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp;
     | KnownResult(s,name,al,r1) ->
         begin
@@ -1197,7 +1229,7 @@ let ref_isabellehol c r =
 	(* get conjecture *)
 	let con =
     match !conjecture with
-        Some(_, con, _) -> coqnorm con (*FIXME rename coqnorm?*)  
+        Some(_, con, _) -> (* coqnorm *) con (*FIXME rename coqnorm?*)  
       | None -> False in
 	(* initialise hypotheses *)
 	let hyp =
@@ -1217,7 +1249,7 @@ let ref_isabellehol c r =
   Printf.fprintf c "  show False\n";
   Printf.fprintf c "    proof (rule ccontr)\n";
 
-  ref_isabellehol1 c r ((neg con, h1) :: hyp) (!coqsig_const) "    ";  (*FIXME what are the parameters?*)
+  ref_isabellehol1 c r ((neg (coqnorm con), h1) :: hyp) (!coqsig_const) "    ";  (*FIXME what are the parameters?*)
   (* Printf.fprintf c "  thus False .\n"; *)
   Printf.fprintf c "    qed\n";
   Printf.fprintf c "  qed\n";
