@@ -566,8 +566,8 @@ let search_main () =
 		| (Some IsarScript, Some r) ->
 		    if (!coqoutchannel = stdout) then
 		      begin
-			      print_string "% SZS output start Proof"; print_newline();
-			      print_string "% Isar Proof Script"; print_newline()
+			      print_string "(*% SZS output start Proof*)"; print_newline();
+			      print_string "(*% Isar Proof Script*)"; print_newline()
 		      end;
 		    let c = !coqoutchannel in
 		      begin
@@ -580,15 +580,15 @@ let search_main () =
 		      end;
 		      if (c = stdout) then
 		        begin
-			        print_string "% SZS output end Proof"; print_newline();
+			        print_string "(*% SZS output end Proof*)"; print_newline();
 		        end
 		      else
 		        close_out c;
 		| _ -> ()
 	      end;
 	      match !conjecture with
-	      | Some _ -> (if (!verbosity > 0) then (Printf.printf "%% SZS status Theorem\n"; Printf.printf "%% %s \n" (String.concat " " (!mode))); exit 20)
-	      | None -> (if (!verbosity > 0) then (Printf.printf "%% SZS status Unsatisfiable\n"; Printf.printf "%% %s \n" (String.concat " " (!mode))); exit 25)
+	      | Some _ -> (if (!verbosity > 0) then (Printf.printf "(*%% SZS status Theorem*)\n"; Printf.printf "(*%% %s *)\n" (String.concat " " (!mode))); exit 20)
+	      | None -> (if (!verbosity > 0) then (Printf.printf "(*%% SZS status Unsatisfiable*)\n"; Printf.printf "(*%% %s *)\n" (String.concat " " (!mode))); exit 25)
 	    end
 	    else
 	      raise Timeout (*** if nontheorem was set, then assume we timedout here. ***)
