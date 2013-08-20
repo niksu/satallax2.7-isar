@@ -782,9 +782,28 @@ let rec ref_isabellehol1 c r hyp const sp=
 
     | Disjunction(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
+	      let sp' = "  " ^ sp in
+	      let sp'' = "  " ^ sp' in
+          (*
 	        Printf.fprintf c "%stab_or %s %s.\n" sp (lookup "5" (coqnorm h) hyp) h1;
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
 	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
+          *)
+
+	        Printf.fprintf c "%sfrom %s have False\n" sp (lookup "5" (coqnorm h) hyp);
+          (*FIXME this block copied from the NegAequivalenz case*)
+          Printf.fprintf c "%sproof\n" sp';
+          Printf.fprintf c "%sassume %s : \"" sp'' h1;
+	        trm_to_isar c s (Variables.make ());
+          Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp'';
+          Printf.fprintf c "%snext\n" sp';
+          Printf.fprintf c "%sassume %s : \"" sp'' h1;
+	        trm_to_isar c t (Variables.make ());
+          Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const sp'';
+          Printf.fprintf c "%sqed\n" sp';
+          Printf.fprintf c "%sthus ?thesis by blast\n" sp';
     | NegConjunction(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
 	        Printf.fprintf c "%stab_nand %s %s.\n" sp (lookup "6" (coqnorm h) hyp) h1;
@@ -805,8 +824,14 @@ let rec ref_isabellehol1 c r hyp const sp=
     | NegDisjunction(h,s,t,r1) ->
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
+          (*
 	        Printf.fprintf c "%stab_nor %s %s %s.\n" sp (lookup "9" (coqnorm h) hyp) h1 h2;
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const sp
+          *)
+	        Printf.fprintf c "%snote %s = TNor1[rule_format, OF %s]\n" sp h1 (lookup "9" (coqnorm h) hyp);
+	        Printf.fprintf c "%snote %s = TNor2[rule_format, OF %s]\n" sp h2 (lookup "9" (coqnorm h) hyp);
+	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const sp
+
     | All(h,s,r1,a,m,n) ->
 	      let const = add_fresh_const c const n sp in
 	      let h1 = get_hyp_name() in
@@ -948,11 +973,37 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const (sp^" ");
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm (neg t),h2)::hyp) const (sp^" ");
     | NegAequivalenz(h,s,t,r1,r2) ->
+        (*
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
 	        Printf.fprintf c "%stab_negiff %s %s %s.\n" sp (lookup "23" (coqnorm h) hyp) h1 h2;
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm (neg t),h2)::hyp) const (sp^" ");
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const (sp^" ");
+          *)
+	      let h1 = get_hyp_name() in
+	      let h2 = get_hyp_name() in
+	      let sp' = "  " ^ sp in
+	      let sp'' = "  " ^ sp' in
+	        Printf.fprintf c "%sfrom TNIff[rule_format, OF %s] have False\n" sp (lookup "23" (coqnorm h) hyp);
+	        Printf.fprintf c "%sproof\n" sp;
+	        Printf.fprintf c "%sassume %s : \"" sp' h1;
+	        trm_to_isar c s (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        Printf.fprintf c "%s and %s : \"" sp' h2;
+	        trm_to_isar c (neg t) (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm (neg t),h2)::hyp) const sp'';
+	        Printf.fprintf c "%snext\n" sp';
+
+	        Printf.fprintf c "%sassume %s : \"" sp' h1;
+	        trm_to_isar c (neg s) (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        Printf.fprintf c "%s and %s : \"" sp' h2;
+	        trm_to_isar c t (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const sp'';
+          Printf.fprintf c "%sqed\n" sp';
+          Printf.fprintf c "%sthus ?thesis by blast\n" sp';
     | Aequivalenz(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
