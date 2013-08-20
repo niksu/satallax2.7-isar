@@ -975,9 +975,9 @@ let print_coqsig c =
 	                begin
 	                  Printf.fprintf c "definition %s :: \"" x;
 	                  print_stp_isar c a (* coq_names *) false;
-	                  Printf.fprintf c "\"\n where \"";
-	                  print_pretrm_isar c m coq_names coq_used_names (-1) (-1); (*FIXME might need to change this to an axiom, or use "==" in the definition otherwise*)
-	                  Printf.fprintf c "\"\n"
+	                  Printf.fprintf c "\"\n where \"%s == (" x;
+	                  print_pretrm_isar c m coq_names coq_used_names (-1) (-1);
+	                  Printf.fprintf c ")\"\n"
 	                end
                 else
 	                begin
@@ -1046,7 +1046,7 @@ let print_coqsig c =
         print_coqsig_const !coqsig_const;
         print_coqsig_def !coqsig_const;
         if !mkproofterm = Some IsarScript then
-	        Printf.fprintf c "lemma\n";
+	        Printf.fprintf c "\nlemma\n";
         print_coqsig_hyp !coqsig_hyp;
         match (!conjecture) with
           | Some (m,_,_) ->
@@ -1054,7 +1054,11 @@ let print_coqsig c =
 	              begin
 	                Printf.fprintf c "shows %s : \"" (Hashtbl.find coq_hyp_names (!conjecturename));
 	                print_pretrm_isar c m coq_names coq_used_names (-1) (-1);
-	                Printf.fprintf c "\"\n"
+	                Printf.fprintf c "\"\n";
+
+                  (*FIXME currently all definitions are unfolded, irrespective of whether when they're used. This seems to reflect Satallax's usage anyway.*)
+                  if List.length !coqsig_def > 0 then
+	                  Printf.fprintf c "unfolding %s\n" (String.concat " " (List.map (fun (s, _) -> s ^ "_def") !coqsig_def))
 	              end
               else
 	              begin
