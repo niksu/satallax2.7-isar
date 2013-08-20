@@ -995,7 +995,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                  Printf.fprintf c "%shave %s : \"! x. ~ %s x\" " sp h1 termname;
 	                  Printf.fprintf c "by (rule TSeps[where 'A = \"";
 	                  print_stp_isar c a true;
-                    Printf.fprintf c "\" and p = %s, THEN mp], rule impI, insert %s, blast)" termname (String.concat " " (List.map snd hyp));
+                    Printf.fprintf c "\" and p = %s, THEN mp], rule impI, insert %s, blast)\n" termname (String.concat " " (List.map snd hyp));
 	                  ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp ^ " ");
               | Name(x,Ar(Ar(a,Prop),_)) ->
 	                Printf.fprintf c "%stab_choice' " sp;
