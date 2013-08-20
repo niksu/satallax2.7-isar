@@ -3,7 +3,6 @@ open State
 open Syntax
 open Refutation
 open Flag
-open Norm
 
 exception Mating_Mismatch of string
 

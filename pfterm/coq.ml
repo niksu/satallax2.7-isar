@@ -3,24 +3,6 @@ open String
 open Syntax
 open Refutation
 open Flag
-open Norm
-
-(** The module Variables is used to translate DeBrujin Indices into variables**)
-module Variables = struct
-	(** next variable counter and list of used variable names**)
-	type t = int * (string list)
-	let make () = (1,[])
-	(** Input: Variables (n,v) 
-		Output: Variables (m,v') with m>n and a new variable name x in v'  **)
-	let rec push (n,v) = 
-		let x = "X" ^ (string_of_int n) in
-		let n = n+1 in
-		if (Hashtbl.mem coq_used_names x) 
-			then push (n,v)	    
-  			else (n,x::v)  
-	let top (_,v) = List.hd v
-	let get i (_,v) = List.nth v i	
-end
 
 (** Prints type m as a Coq-formatted string on the out_channel c  **)
 let rec print_stp_coq c m h p =
@@ -570,143 +552,6 @@ let ref_coq c r =
   Printf.fprintf c "Qed.\n";
   Printf.fprintf c "End SatallaxProblem.\n" 
 
-let tstpizename x =
-  if (String.length x > 0) then
-    if (String.get x 0 = '_') then
-      "eigen" ^ x
-    else if (String.get x 0 = '@') then
-      String.sub x 1 ((String.length x) - 1)
-    else
-      if ((String.length x > 5) && (String.sub x 0 5 = "eigen")) then
-	"not" ^ x
-      else
-	x
-  else x
-
-(*FIXME next batch of functions are adapted from the TSTP functions*)
-let rec trm_to_isar c m bound =
-  match m with
-      Name(x,_) -> (* Definitions *)
-        Printf.fprintf c "%s" (tstpizename x)
-    | False -> (* Bottom *)
-	      Printf.fprintf c "False"
-    | Ap(Ap(Imp,m1),False) ->  (* Negation *)
-	      begin
-	        Printf.fprintf c "(~(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c "))";
-	      end
-    | Ap(Ap(Imp,m1),m2) -> (* Implication *)
-	      begin
-	        Printf.fprintf c "(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c " --> ";
-	        trm_to_isar c m2 bound;
-	        Printf.fprintf c ")";
-	      end
-    | Ap(Imp,m1) -> trm_to_isar c (Lam(Prop,Ap(Ap(Imp,shift m1 0 1),DB(0,Prop)))) bound
-    | Imp -> trm_to_isar c (Lam(Prop,Lam(Prop,Ap(Ap(Imp,DB(1,Prop)),DB(0,Prop))))) bound
-    | Ap(Forall(a),Lam(_,m1)) -> (* forall with Lam *)
-        begin
-	        print_all_isar c a m1 bound
-        end
-    | Forall(a) ->
-        begin
-	        Printf.fprintf c "All";
-        end
-    | Ap(Ap(Eq(a),m1),m2) -> (* Equality *)
-	      begin
-	        Printf.fprintf c "(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c " = ";
-	        trm_to_isar c m2 bound;
-	        Printf.fprintf c ")"
-	      end
-    | Eq(a) ->
-        Printf.fprintf c "(op =)"
-    | Ap(Choice(a),Lam(_,m1)) ->
-        let bound = Variables.push bound in
-          Printf.fprintf c "(@ "; Printf.fprintf c "%s" (Variables.top bound);
-          Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false;
-          Printf.fprintf c ". ";
-          trm_to_isar c m1 bound; Printf.fprintf c ")"
-    | Choice(a) ->
-        Printf.fprintf c "Eps";
-    | True -> (* Top *)
-	      Printf.fprintf c "True"
-    | Ap(Ap(And,m1),m2) -> (* conjunction *)
-	      begin
-	        Printf.fprintf c "(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c " & ";
-	        trm_to_isar c m2 bound;
-	        Printf.fprintf c ")";
-	      end
-    | And ->Printf.fprintf c "(op &)"
-    | Ap(Ap(Or,m1),m2) -> (* disjunction *)
-	      begin
-	        Printf.fprintf c "(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c " | ";
-	        trm_to_isar c m2 bound;
-	        Printf.fprintf c ")";
-	      end
-    | Or -> Printf.fprintf c "(op |)"
-    | Ap(Ap(Iff,m1),m2) -> (* equivalenz *)
-	      begin
-	        Printf.fprintf c "(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c " = ";
-	        trm_to_isar c m2 bound;
-	        Printf.fprintf c ")";
-	      end
-    | Iff -> Printf.fprintf c "(op =)"
-    | Neg -> Printf.fprintf c "Not"
-    | Ap(Exists(a),Lam(_,m1)) -> (* exist *)
-        begin
-	        print_ex_isar c a m1 bound
-        end
-    | Exists(a) ->
-        begin
-	        Printf.fprintf c "Ex";
-        end
-    | DB(i,a) -> (* Bound variable *)
-	      Printf.fprintf c "%s" (Variables.get i bound)
-    | Lam(a,m) ->
-        begin
-	        print_lam_isar c a m bound
-        end
-    | Ap(m1,m2) ->
-	      begin
-	        Printf.fprintf c "(";
-	        trm_to_isar c m1 bound;
-	        Printf.fprintf c " ";
-	        trm_to_isar c m2 bound;
-	        Printf.fprintf c ")";
-	      end
-    | _ -> raise (GenericSyntaxError ("Unknown case in trm_to_isar version : " ^ (trm_str m)))
- (* Prints consecutive lambda-terms as a single fun in Isar. *)
-and print_lam_isar c a m bound =
-	let bound = Variables.push bound in
-	  Printf.fprintf c "(%% "; Printf.fprintf c "%s" (Variables.top bound); Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false; Printf.fprintf c ". ";
-	  match m with
-		  | Lam(b,m') -> print_lam_isar c b m' bound; Printf.fprintf c ")"
-		  | _ -> trm_to_isar c m bound; Printf.fprintf c ")"
-(* Prints consecutive forall-terms together with the corresponding lambda-terms as a single forall in Isar. *)
-and print_all_isar c a m bound =
-  let bound = Variables.push bound in
-    Printf.fprintf c "(! "; Printf.fprintf c "%s" (Variables.top bound); Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false; Printf.fprintf c ". ";
-    match m with
-      | Ap(Forall(a'),Lam(_,m')) -> print_all_isar c a' m' bound; Printf.fprintf c ")"
-      | _ -> trm_to_isar c m bound; Printf.fprintf c ")"
-(* Prints an exist-term together with the corresponding lambda-term as an exists in Isar. *)
-and print_ex_isar c a m bound =
- 	let bound = Variables.push bound in
-	  Printf.fprintf c "(? "; Printf.fprintf c "%s" (Variables.top bound);
-	  Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false;
-    Printf.fprintf c ". ";
-	  trm_to_isar c m bound; Printf.fprintf c ")"
-
 let forallbvarnames : (string,string) Hashtbl.t = Hashtbl.create 100;;
 let nexistsbvarnames : (string,string) Hashtbl.t = Hashtbl.create 100;;
 
@@ -772,12 +617,12 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        Printf.fprintf c "%sfrom %s have False\n" sp h1;
           Printf.fprintf c "%sproof\n" sp';
           Printf.fprintf c "%sassume %s : \"" sp'' h1;
-	        trm_to_isar c s (Variables.make ());
+	        trm_to_isar c (coqnorm s) (Variables.make ());
           Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp'';
           Printf.fprintf c "%snext\n" sp';
           Printf.fprintf c "%sassume %s : \"" sp'' h1;
-	        trm_to_isar c t (Variables.make ());
+	        trm_to_isar c (coqnorm t) (Variables.make ());
           Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
@@ -797,12 +642,12 @@ let rec ref_isabellehol1 c r hyp const sp=
           (*FIXME this block copied from the NegAequivalenz case*)
           Printf.fprintf c "%sproof\n" sp';
           Printf.fprintf c "%sassume %s : \"" sp'' h1;
-	        trm_to_isar c s (Variables.make ());
+	        trm_to_isar c (coqnorm s) (Variables.make ());
           Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp'';
           Printf.fprintf c "%snext\n" sp';
           Printf.fprintf c "%sassume %s : \"" sp'' h1;
-	        trm_to_isar c t (Variables.make ());
+	        trm_to_isar c (coqnorm t) (Variables.make ());
           Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
@@ -853,7 +698,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	      let x = Hashtbl.find coq_names x in
 	        (* Printf.fprintf c "%stab_negall %s %s %s.\n" sp (lookup "11" (coqnorm h) hyp) x h1; *)
 	        Printf.fprintf c "%sfrom %s obtain eigen%s where %s : \"" sp (lookup "11" (coqnorm h) hyp) x h1;
-	        trm_to_isar c s (Variables.make ());
+	        trm_to_isar c (coqnorm s) (Variables.make ());
 	        Printf.fprintf c "\" by (erule TNegAll'[rule_format])\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp
     | Exist(h,s,r1,a,m,x) ->
@@ -870,7 +715,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 
           (* tab_negex H0 (forall (X1:o), ~ X1) H1. *)
 	        Printf.fprintf c "%snote %s = TNegEx[OF %s, where y = \"" sp h1 (lookup "13" (coqnorm h) hyp);
-	        trm_to_isar c n (Variables.make ());
+	        trm_to_isar c (coqnorm n) (Variables.make ());
 	        Printf.fprintf c "\"]\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp
     | Mating(h1,h2, ss, rs) ->
@@ -940,7 +785,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ignore(List.fold_right
             (fun (s, r) remaining ->
                Printf.fprintf c "%sassume %s : \"" sp'' h3;
-	             trm_to_isar c s (Variables.make ());
+	             trm_to_isar c (coqnorm s) (Variables.make ());
                Printf.fprintf c "\"\n";
                ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const sp'';
 
@@ -981,19 +826,19 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        Printf.fprintf c "%sfrom TBE[rule_format, OF %s] have False\n" sp (lookup "23" (coqnorm h) hyp);
 	        Printf.fprintf c "%sproof\n" sp;
 	        Printf.fprintf c "%sassume %s : \"" sp' h1;
-	        trm_to_isar c s (Variables.make ());
+	        trm_to_isar c (coqnorm s) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        Printf.fprintf c "%s and %s : \"" sp' h2;
-	        trm_to_isar c (neg t) (Variables.make ());
+	        trm_to_isar c (coqnorm (neg t)) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm (neg t),h2)::hyp) const sp'';
 	        Printf.fprintf c "%snext\n" sp';
 
 	        Printf.fprintf c "%sassume %s : \"" sp' h1;
-	        trm_to_isar c (neg s) (Variables.make ());
+	        trm_to_isar c (coqnorm (neg s)) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        Printf.fprintf c "%s and %s : \"" sp' h2;
-	        trm_to_isar c t (Variables.make ());
+	        trm_to_isar c (coqnorm t) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
@@ -1019,19 +864,19 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        Printf.fprintf c "%sfrom TNIff[rule_format, OF %s] have False\n" sp (lookup "23" (coqnorm h) hyp);
 	        Printf.fprintf c "%sproof\n" sp;
 	        Printf.fprintf c "%sassume %s : \"" sp' h1;
-	        trm_to_isar c s (Variables.make ());
+	        trm_to_isar c (coqnorm s) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        Printf.fprintf c "%s and %s : \"" sp' h2;
-	        trm_to_isar c (neg t) (Variables.make ());
+	        trm_to_isar c (coqnorm (neg t)) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm (neg t),h2)::hyp) const sp'';
 	        Printf.fprintf c "%snext\n" sp';
 
 	        Printf.fprintf c "%sassume %s : \"" sp' h1;
-	        trm_to_isar c (neg s) (Variables.make ());
+	        trm_to_isar c (coqnorm (neg s)) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        Printf.fprintf c "%s and %s : \"" sp' h2;
-	        trm_to_isar c t (Variables.make ());
+	        trm_to_isar c (coqnorm t) (Variables.make ());
 	        Printf.fprintf c "\"\n";
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
@@ -1243,7 +1088,7 @@ let ref_isabellehol c r =
 (*to_trm name_trm [] (neg con) None*)
   (* print_pretrm_isar c precon coq_names coq_used_names (-1) (-1); *)
 
-  trm_to_isar c (neg con) (Variables.make ());
+  trm_to_isar c (coqnorm (neg con)) (Variables.make ());
 
   Printf.fprintf c "\"\n";
   Printf.fprintf c "  show False\n";

@@ -66,9 +66,37 @@ let name_trm_list : (string * trm * stp) list ref = ref []
 let name_def : (string,trm) Hashtbl.t = Hashtbl.create 100
 let name_def_prenorm : (string,trm) Hashtbl.t = Hashtbl.create 100
 let name_hyp : (string,trm) Hashtbl.t = Hashtbl.create 100
-let coq_used_names : (string,unit) Hashtbl.t = Hashtbl.create 100
-let coq_names : (string,string) Hashtbl.t = Hashtbl.create 100
-let coq_hyp_names : (string,string) Hashtbl.t = Hashtbl.create 100
+
+(** Replaces all occurences of 'Neg' by 'implies False' **)
+let rec negnorm1 m =
+  match m with
+  | Ap(Neg,m1) ->
+      let (n1,_) = negnorm1 m1 in
+      (imp n1 False,true)
+  | Neg -> (Lam(Prop,imp (DB(0,Prop)) False),true)
+  | Ap(m1,m2) ->
+      let (n1,b1) = negnorm1 m1 in
+      let (n2,b2) = negnorm1 m2 in
+      if (b1 || b2) then
+	(Ap(n1,n2),true)
+      else
+	(m,false)
+  | Lam(a1,m1) ->
+      let (n1,b1) = negnorm1 m1 in
+      if b1 then
+	(Lam(a1,n1),true)
+      else
+	(m,false)
+  | _ -> (m,false)
+(** applies neg- and betanormalization**)
+let onlynegnorm m =
+  let (n,_) = negnorm1 m in onlybetanorm n
+(** applies neg-, beta- and delta-normalization**)
+let coqnorm m =
+  let m = betanorm name_def_prenorm m in
+  let (n,_) = negnorm1 m in n
+(** applies full satallax normalization**)
+let normalize pt = norm name_def (logicnorm pt)
 
 let coqknown (x,y) =
   if (!coq2) then y else x
@@ -1049,18 +1077,17 @@ let print_coqsig c =
 	        Printf.fprintf c "\nlemma\n";
         print_coqsig_hyp !coqsig_hyp;
         match (!conjecture) with
-          | Some (m,_,_) ->
+          | Some (m,t,_) ->
               if !mkproofterm = Some IsarScript then
 	              begin
 	                Printf.fprintf c "shows %s : \"" (Hashtbl.find coq_hyp_names (!conjecturename));
-	                print_pretrm_isar c m coq_names coq_used_names (-1) (-1);
+	                (* print_pretrm_isar c m coq_names coq_used_names (-1) (-1); *)
+	                trm_to_isar c (coqnorm t) (Syntax.Variables.make ());
 	                Printf.fprintf c "\"\n";
 
-(*
                   (*FIXME currently all definitions are unfolded, irrespective of whether when they're used. This seems to reflect Satallax's usage anyway.*)
                   if List.length !coqsig_def > 0 then
 	                  Printf.fprintf c "unfolding %s\n" (String.concat " " (List.map (fun (s, _) -> s ^ "_def") !coqsig_def))
-*)
 	              end
               else
 	              begin

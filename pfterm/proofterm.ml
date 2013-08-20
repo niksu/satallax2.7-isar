@@ -10,7 +10,6 @@ open Translation
 open Latex
 open Coq
 open Branch
-open Norm
 
 (** to String functions for debugging**)
 

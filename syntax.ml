@@ -1990,3 +1990,160 @@ let rec trm_to_foform_stp_rec p vl eqoequiv =
 (*** Takes a trm p and either returns a pair of a foform with optionally a simple type
      or raises NotFO ***)
 let trm_to_foform_stp p eqoequiv = trm_to_foform_stp_rec p [] eqoequiv
+
+let tstpizename x =
+  if (String.length x > 0) then
+    if (String.get x 0 = '_') then
+      "eigen" ^ x
+    else if (String.get x 0 = '@') then
+      String.sub x 1 ((String.length x) - 1)
+    else
+      if ((String.length x > 5) && (String.sub x 0 5 = "eigen")) then
+	"not" ^ x
+      else
+	x
+  else x
+
+let coq_used_names : (string,unit) Hashtbl.t = Hashtbl.create 100
+let coq_names : (string,string) Hashtbl.t = Hashtbl.create 100
+let coq_hyp_names : (string,string) Hashtbl.t = Hashtbl.create 100
+(** The module Variables is used to translate DeBrujin Indices into variables**)
+module Variables = struct
+	(** next variable counter and list of used variable names**)
+	type t = int * (string list)
+	let make () = (1,[])
+	(** Input: Variables (n,v)
+		Output: Variables (m,v') with m>n and a new variable name x in v'  **)
+	let rec push (n,v) =
+		let x = "X" ^ (string_of_int n) in
+		let n = n+1 in
+		if (Hashtbl.mem coq_used_names x)
+			then push (n,v)
+  			else (n,x::v)
+	let top (_,v) = List.hd v
+	let get i (_,v) = List.nth v i
+end
+
+(*FIXME next batch of functions are adapted from the TSTP functions*)
+let rec trm_to_isar c m bound =
+  match m with
+      Name(x,_) -> (* Definitions *)
+        Printf.fprintf c "%s" (tstpizename x)
+    | False -> (* Bottom *)
+	      Printf.fprintf c "False"
+    | Ap(Ap(Imp,m1),False) ->  (* Negation *)
+	      begin
+	        Printf.fprintf c "(~(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c "))";
+	      end
+    | Ap(Ap(Imp,m1),m2) -> (* Implication *)
+	      begin
+	        Printf.fprintf c "(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c " --> ";
+	        trm_to_isar c m2 bound;
+	        Printf.fprintf c ")";
+	      end
+    | Ap(Imp,m1) -> trm_to_isar c (Lam(Prop,Ap(Ap(Imp,shift m1 0 1),DB(0,Prop)))) bound
+    | Imp -> trm_to_isar c (Lam(Prop,Lam(Prop,Ap(Ap(Imp,DB(1,Prop)),DB(0,Prop))))) bound
+    | Ap(Forall(a),Lam(_,m1)) -> (* forall with Lam *)
+        begin
+	        print_all_isar c a m1 bound
+        end
+    | Forall(a) ->
+        begin
+	        Printf.fprintf c "All";
+        end
+    | Ap(Ap(Eq(a),m1),m2) -> (* Equality *)
+	      begin
+	        Printf.fprintf c "(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c " = ";
+	        trm_to_isar c m2 bound;
+	        Printf.fprintf c ")"
+	      end
+    | Eq(a) ->
+        Printf.fprintf c "(op =)"
+    | Ap(Choice(a),Lam(_,m1)) ->
+        let bound = Variables.push bound in
+          Printf.fprintf c "(@ "; Printf.fprintf c "%s" (Variables.top bound);
+          Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false;
+          Printf.fprintf c ". ";
+          trm_to_isar c m1 bound; Printf.fprintf c ")"
+    | Choice(a) ->
+        Printf.fprintf c "Eps";
+    | True -> (* Top *)
+	      Printf.fprintf c "True"
+    | Ap(Ap(And,m1),m2) -> (* conjunction *)
+	      begin
+	        Printf.fprintf c "(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c " & ";
+	        trm_to_isar c m2 bound;
+	        Printf.fprintf c ")";
+	      end
+    | And ->Printf.fprintf c "(op &)"
+    | Ap(Ap(Or,m1),m2) -> (* disjunction *)
+	      begin
+	        Printf.fprintf c "(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c " | ";
+	        trm_to_isar c m2 bound;
+	        Printf.fprintf c ")";
+	      end
+    | Or -> Printf.fprintf c "(op |)"
+    | Ap(Ap(Iff,m1),m2) -> (* equivalenz *)
+	      begin
+	        Printf.fprintf c "(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c " = ";
+	        trm_to_isar c m2 bound;
+	        Printf.fprintf c ")";
+	      end
+    | Iff -> Printf.fprintf c "(op =)"
+    | Neg -> Printf.fprintf c "Not"
+    | Ap(Exists(a),Lam(_,m1)) -> (* exist *)
+        begin
+	        print_ex_isar c a m1 bound
+        end
+    | Exists(a) ->
+        begin
+	        Printf.fprintf c "Ex";
+        end
+    | DB(i,a) -> (* Bound variable *)
+	      Printf.fprintf c "%s" (Variables.get i bound)
+    | Lam(a,m) ->
+        begin
+	        print_lam_isar c a m bound
+        end
+    | Ap(m1,m2) ->
+	      begin
+	        Printf.fprintf c "(";
+	        trm_to_isar c m1 bound;
+	        Printf.fprintf c " ";
+	        trm_to_isar c m2 bound;
+	        Printf.fprintf c ")";
+	      end
+    | _ -> raise (GenericSyntaxError ("Unknown case in trm_to_isar version : " ^ (trm_str m)))
+ (* Prints consecutive lambda-terms as a single fun in Isar. *)
+and print_lam_isar c a m bound =
+	let bound = Variables.push bound in
+	  Printf.fprintf c "(%% "; Printf.fprintf c "%s" (Variables.top bound); Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false; Printf.fprintf c ". ";
+	  match m with
+		  | Lam(b,m') -> print_lam_isar c b m' bound; Printf.fprintf c ")"
+		  | _ -> trm_to_isar c m bound; Printf.fprintf c ")"
+(* Prints consecutive forall-terms together with the corresponding lambda-terms as a single forall in Isar. *)
+and print_all_isar c a m bound =
+  let bound = Variables.push bound in
+    Printf.fprintf c "(! "; Printf.fprintf c "%s" (Variables.top bound); Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false; Printf.fprintf c ". ";
+    match m with
+      | Ap(Forall(a'),Lam(_,m')) -> print_all_isar c a' m' bound; Printf.fprintf c ")"
+      | _ -> trm_to_isar c m bound; Printf.fprintf c ")"
+(* Prints an exist-term together with the corresponding lambda-term as an exists in Isar. *)
+and print_ex_isar c a m bound =
+ 	let bound = Variables.push bound in
+	  Printf.fprintf c "(? "; Printf.fprintf c "%s" (Variables.top bound);
+	  Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false;
+    Printf.fprintf c ". ";
+	  trm_to_isar c m bound; Printf.fprintf c ")"

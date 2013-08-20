@@ -60,9 +60,6 @@ val name_trm_list : (string * trm * stp) list ref
 val name_def : (string,trm) Hashtbl.t
 val name_def_prenorm : (string,trm) Hashtbl.t
 val name_hyp : (string,trm) Hashtbl.t
-val coq_used_names : (string,unit) Hashtbl.t
-val coq_names : (string,string) Hashtbl.t
-val coq_hyp_names : (string,string) Hashtbl.t
 val coqknown : string * string -> string
 
 exception Timeout
@@ -254,4 +251,6 @@ val reset_search : unit -> unit
 
 val print_model : bool -> unit
 
-
+val onlynegnorm : trm -> trm
+val coqnorm : trm -> trm
+val normalize : trm -> trm

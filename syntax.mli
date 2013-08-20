@@ -128,3 +128,18 @@ type foform = (*** assuming a single sort ***)
 exception NotFO
 
 val trm_to_foform_stp : trm -> bool -> foform * stp option
+val trm_to_isar : out_channel -> trm -> int * string list -> unit
+val tstpizename : string -> string
+
+val coq_used_names : (string,unit) Hashtbl.t
+val coq_names : (string,string) Hashtbl.t
+val coq_hyp_names : (string,string) Hashtbl.t
+module Variables:
+sig
+	(** next variable counter and list of used variable names**)
+	type t = int * (string list)
+	val make : unit -> t
+	val push : t -> t
+  val top : t -> string
+  val get : int -> 'a * 'b list -> 'b
+end
