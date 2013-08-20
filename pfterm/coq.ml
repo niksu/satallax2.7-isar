@@ -836,9 +836,14 @@ let rec ref_isabellehol1 c r hyp const sp=
     | NegExist(h,s,r1,a,m,n) ->
 	      let const = add_fresh_const c const n sp in
 	      let h1 = get_hyp_name() in
-	        Printf.fprintf c "%stab_negex %s (" sp (lookup "13" (coqnorm h) hyp);
-	        (trm_to_coq c n (Variables.make ()) (-1) (-1));
-	        Printf.fprintf c ") %s.\n" h1;
+	        (* Printf.fprintf c "%stab_negex %s (" sp (lookup "13" (coqnorm h) hyp); *)
+	        (* (trm_to_coq c n (Variables.make ()) (-1) (-1)); *)
+	        (* Printf.fprintf c ") %s.\n" h1; *)
+
+          (* tab_negex H0 (forall (X1:o), ~ X1) H1. *)
+	        Printf.fprintf c "%snote %s = TNegEx[OF %s, where y = \"" sp h1 (lookup "13" (coqnorm h) hyp);
+	        trm_to_isar c n (Variables.make ());
+	        Printf.fprintf c "\"]\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp
     | Mating(h1,h2, ss, rs) ->
 	      let h3 = get_hyp_name() in
@@ -919,7 +924,6 @@ let rec ref_isabellehol1 c r hyp const sp=
 
           Printf.fprintf c "%sqed\n" sp';
           Printf.fprintf c "%sthus ?thesis by blast\n" sp';
-
 
     | Confront(h1,h2,su,tu,sv,tv,r1,r2) ->
 	      let h3 = get_hyp_name() in
@@ -1015,8 +1019,16 @@ let rec ref_isabellehol1 c r hyp const sp=
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | Iff -> 	Printf.fprintf c "%stab_rew_iff %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Exists(_) -> 	Printf.fprintf c "%stab_rew_ex %s %s (" sp h1 h2;
-				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+		          | Exists(_) ->
+                  (* Printf.fprintf c "%stab_rew_ex %s %s (" sp h1 h2; *)
+				          (* (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n"; *)
+
+(* note H2 = eq_ind[THEN spec, of "% p. ? x. p x", THEN spec, of "% (X1::(bool=>bool)=>bool). ~ X1 (% X2::bool. X2)", THEN mp, OF H0, THEN spec, of "% p. ~ (! x. ~ p x)", THEN mp, OF eq_exists_nforall] *)
+
+                  (*FIXME horrible hardcoding*)
+                    Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"%% p. ? x. p x\", THEN spec, of \"" sp h2;
+				            trm_to_isar c prefix (Variables.make ());
+                    Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% p. ~ (! x. ~ p x)\", THEN mp, OF eq_exists_nforall]\n" h1;
 		          | Eq(_) -> 	Printf.fprintf c "%stab_rew_sym %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | Lam(_,Lam(_,Ap(DB(1,_),DB(0,_)))) ->
