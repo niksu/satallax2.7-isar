@@ -1029,16 +1029,20 @@ let print_coqsig c =
 	              begin
 	                print_coqsig_hyp r;
 	                Printf.fprintf c "assumes %s : \"" x;
-	                print_pretrm_isar c m coq_names coq_used_names (-1) (-1);
+	                (* print_pretrm_isar c m coq_names coq_used_names (-1) (-1); *)
+                  trm_to_isar c (coqnorm m) (Syntax.Variables.make ());
 	                Printf.fprintf c "\"\n"
                 end
               else
+                failwith "Printing of hypotheses might need modification for Coq."
+(*
 	              begin
 	                print_coqsig_hyp r;
 	                Printf.fprintf c "Hypothesis %s : " x;
 	                if (!coq2) then print_pretrm_coq2 c m (-1) (-1) else print_pretrm_coq c m coq_names coq_used_names (-1) (-1);
 	                Printf.fprintf c ".\n"
                 end
+*)
 	          with
 	            | Not_found ->
 	                begin
@@ -1075,7 +1079,7 @@ let print_coqsig c =
         print_coqsig_def !coqsig_const;
         if !mkproofterm = Some IsarScript then
 	        Printf.fprintf c "\nlemma\n";
-        print_coqsig_hyp !coqsig_hyp;
+        print_coqsig_hyp !coqsig_hyp_trm;
         match (!conjecture) with
           | Some (m,t,_) ->
               if !mkproofterm = Some IsarScript then
