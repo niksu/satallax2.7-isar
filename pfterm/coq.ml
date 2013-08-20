@@ -750,7 +750,10 @@ let rec ref_isabellehol1 c r hyp const sp=
     | Fal(_) ->
 	      Printf.fprintf c "%stab_false %s.\n" sp (lookup "2" False hyp)
     | NegRefl(s) ->
-	      Printf.fprintf c "%stab_refl %s.\n" sp (lookup "3" (coqnorm s) hyp)
+	      (* Printf.fprintf c "%stab_refl %s.\n" sp (lookup "3" (coqnorm s) hyp) *)
+	      Printf.fprintf c "%sfrom %s have False by blast (*tab_refl*)\n" sp (lookup "3" (coqnorm s) hyp);
+	      Printf.fprintf c "%sthus ?thesis by blast\n" sp
+
     | Implication(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
 	      let sp' = sp ^ "  " in
