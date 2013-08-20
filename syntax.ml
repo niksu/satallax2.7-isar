@@ -299,11 +299,11 @@ let rec print_stp_isar c m p =
         Printf.fprintf c "o"
     | Ar(a,b) ->
         begin
-	        if p then Printf.fprintf c "(";
+(*	        if p then*) Printf.fprintf c "(";
 	        print_stp_isar c a true;
 	        Printf.fprintf c "=>";
 	        print_stp_isar c b false;
-	        if p then Printf.fprintf c ")";
+(*	        if p then*) Printf.fprintf c ")";
 	        flush c
         end
 
@@ -703,6 +703,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(PImplies,m1),m2) ->
+(*
         if ((lp < 17) && (rp < 16)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 17;
@@ -710,6 +711,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 16 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 17;
@@ -718,6 +720,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(PRevImplies,m2),m1) ->
+(*
         if ((lp < 17) && (rp < 16)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 17;
@@ -725,6 +728,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 16 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 17;
@@ -733,6 +737,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(PAnd,m1),m2) ->
+(*
         if ((lp < 21) && (rp < 20)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 21;
@@ -740,6 +745,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 20 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 21;
@@ -765,6 +771,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(PIff,m1),m2) ->
+(*
         if ((lp < 14) && (rp < 14)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 14;
@@ -772,6 +779,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 14 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 14;
@@ -780,6 +788,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(PEq,m1),m2) ->
+(*
         if ((lp < 40) && (rp < 40)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 40;
@@ -787,6 +796,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 40 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 40;
@@ -795,37 +805,37 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAp(PAp(PNEq,m1),m2) ->
-        if (rp >= 40) then Printf.fprintf c "(";
+(*        if (rp >= 40) then*) Printf.fprintf c "(";
         Printf.fprintf c "~ (";
         print_pretrm_isar c m1 h hu (-1) 40;
         Printf.fprintf c " = ";
         print_pretrm_isar c m2 h hu 40 (-1);
         Printf.fprintf c ")";
-        if (rp >= 40) then Printf.fprintf c ")";
+(*        if (rp >= 40) then*) Printf.fprintf c ")";
     | PAp(PAp(PNIff,m1),m2) ->
-        if (rp >= 30) then Printf.fprintf c "(";
+(*        if (rp >= 30) then*) Printf.fprintf c "(";
         Printf.fprintf c "~ (";
         print_pretrm_isar c m1 h hu (-1) 14;
         Printf.fprintf c " = ";
         print_pretrm_isar c m2 h hu 14 (-1);
         Printf.fprintf c ")";
-        if (rp >= 30) then Printf.fprintf c ")";
+(*        if (rp >= 30) then*) Printf.fprintf c ")";
     | PAp(PAp(PNAnd,m1),m2) ->
-        if (rp >= 30) then Printf.fprintf c "(";
+(*        if (rp >= 30) then*) Printf.fprintf c "(";
         Printf.fprintf c "~ (";
         print_pretrm_isar c m1 h hu (-1) 20;
         Printf.fprintf c " & ";
         print_pretrm_isar c m2 h hu 21 (-1);
         Printf.fprintf c ")";
-        if (rp >= 30) then Printf.fprintf c ")";
+(*        if (rp >= 30) then*) Printf.fprintf c ")";
     | PAp(PAp(PNOr,m1),m2) ->
-        if (rp >= 30) then Printf.fprintf c "(";
+(*        if (rp >= 30) then*) Printf.fprintf c "(";
         Printf.fprintf c "~ (";
         print_pretrm_isar c m1 h hu (-1) 18;
         Printf.fprintf c " | ";
         print_pretrm_isar c m2 h hu 19 (-1);
         Printf.fprintf c ")";
-        if (rp >= 30) then Printf.fprintf c ")";
+(*        if (rp >= 30) then*) Printf.fprintf c ")";
     | PIff -> Printf.fprintf c "(op =)"
     | POr -> Printf.fprintf c "(op |)"
     | PAnd -> Printf.fprintf c "(op &)"
@@ -837,6 +847,7 @@ let rec print_pretrm_isar c m h hu lp rp =
     | PEq ->
         Printf.fprintf c "(op =)";
     | PAp(m1,m2) ->
+(*
         if ((lp < 5000) && (rp < 5001)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 5000;
@@ -844,6 +855,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 5001 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 5000;
@@ -852,6 +864,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          Printf.fprintf c ")";
 	        end
     | PAr(m1,m2) ->
+(*
         if ((lp < 71) && (rp < 70)) then
 	        begin
 	          print_pretrm_isar c m1 h hu lp 71;
@@ -859,6 +872,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	          print_pretrm_isar c m2 h hu 70 rp;
 	        end
         else
+*)
 	        begin
 	          Printf.fprintf c "(";
 	          print_pretrm_isar c m1 h hu (-1) 71;
@@ -870,42 +884,42 @@ let rec print_pretrm_isar c m h hu lp rp =
 (***  | PDef(n,p) -> print_pretrm_isar c n h hu lp rp ***)
     | PULam(xl,m) ->
         begin
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c "(";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c "(";
 	        begin
 	          Printf.fprintf c "%% ";
 	          print_ulam_isar c xl m h hu
 	        end;
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c ")";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c ")";
         end
     | PLam(xl,m) ->
         begin
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c "(";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c "(";
 	        begin
 	          Printf.fprintf c "%% ";
 	          print_lam_isar c xl m h hu
 	        end;
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c ")";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c ")";
         end
     | PAll(xl,m) ->
         begin
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c "(";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c "(";
 	        begin
 	          Printf.fprintf c "!";
 	          print_all_isar c xl m h hu
 	        end;
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c ")";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c ")";
         end
     | PEx(xl,m) ->
         begin
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c "(";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c "(";
 	        begin
 	          print_ex_isar c xl m h hu
 	        end;
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c ")";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c ")";
         end
     | PChoice((x,xa),m) ->
         begin
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c "(";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c "(";
 	        begin
 	          let y = coqify_name x h hu in
 	            Hashtbl.remove h x; (*** pops y from the values of x to print domain ***)
@@ -922,7 +936,7 @@ let rec print_pretrm_isar c m h hu lp rp =
 	            Hashtbl.remove hu y; (*** free y to be used later ***)
 	            Printf.fprintf c ")";
 	        end;
-	        if ((lp >= 0) || (rp >= 0)) then Printf.fprintf c ")";
+(*	        if ((lp >= 0) || (rp >= 0)) then*) Printf.fprintf c ")";
         end
     | _ -> raise (GenericSyntaxError ("Unknown pretrm case print Coq version : " ^ (pretrm_str m))) (*FIXME this wasnt changed from the original function*)
 and print_ulam_isar c xl m h hu =
