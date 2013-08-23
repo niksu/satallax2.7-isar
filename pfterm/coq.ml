@@ -1094,7 +1094,7 @@ let rec ref_isabellehol1 c r hyp const sp=
                         let ty_names =
                           List.combine (countup 1 length_al []) al
                         in
-	                        List.fold_right
+	                        ignore(List.fold_right
                             (*"ty" is the name of the schematic type variable;
                               "a" is the object-level type it's being instantiate to*)
 	                          (fun (ty, a) remaining -> (
@@ -1102,7 +1102,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                             print_stp_coq c a coq_names true;
                                if remaining > 1 then Printf.fprintf c " and "; (*FIXME const*)
                                remaining - 1))
-	                          ty_names length_al;
+	                          ty_names length_al);
 	                        Printf.fprintf c "]"
                       end;
 	                  Printf.fprintf c "\n";
