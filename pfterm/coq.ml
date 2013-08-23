@@ -310,11 +310,18 @@ let rec find_fresh_consts n const =
 (** Input: out_channel c, association list (constant name -> type) const, term n, Space string sp 
 	Output: prints inhabitation tactic for fresh constants on c and returns an updated list const **)	
 let add_fresh_const c const n sp =
-  List.fold_left
-    (fun cons (x,a) -> 
-      if List.mem (x,a) cons then cons 
-      else (Printf.fprintf c "%stab_inh (" sp; print_stp_coq c a coq_names false; Printf.fprintf c ") %s.\n" x ;(x,a)::cons))
-    const (find_fresh_consts (coqnorm n) const)
+  let add_fresh_const' cons (x, a) =
+    if List.mem (x, a) cons then cons
+    else
+      begin
+        Printf.fprintf c "%stab_inh (" sp;
+        print_stp_coq c a coq_names false;
+        Printf.fprintf c ") %s.\n" x;
+        (x, a) :: cons
+      end
+  in
+    List.fold_left add_fresh_const'
+      const (find_fresh_consts (coqnorm n) const)
 
 let rec lookup w s hyp =
   try
