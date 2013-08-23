@@ -309,14 +309,23 @@ let rec find_fresh_consts n const =
 
 (** Input: out_channel c, association list (constant name -> type) const, term n, Space string sp 
 	Output: prints inhabitation tactic for fresh constants on c and returns an updated list const **)	
-let add_fresh_const c const n sp =
+let add_fresh_const is_isar c const n sp =
   let add_fresh_const' cons (x, a) =
     if List.mem (x, a) cons then cons
     else
       begin
-        Printf.fprintf c "%stab_inh (" sp;
-        print_stp_coq c a coq_names false;
-        Printf.fprintf c ") %s.\n" x;
+        if is_isar then
+          begin
+            Printf.fprintf c "%sfixes (%s :: " sp x;
+            print_stp_isar c a false;
+            Printf.fprintf c ")\n";
+          end
+        else
+          begin
+            Printf.fprintf c "%stab_inh (" sp;
+            print_stp_coq c a coq_names false;
+            Printf.fprintf c ") %s.\n" x;
+          end;
         (x, a) :: cons
       end
   in
@@ -373,7 +382,7 @@ let rec ref_coq1 c r hyp const sp=
 	Printf.fprintf c "%stab_nor %s %s %s.\n" sp (lookup "9" (coqnorm h) hyp) h1 h2;
 	ref_coq1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const sp
  | All(h,s,r1,a,m,n) ->
-	let const = add_fresh_const c const n sp in
+	let const = add_fresh_const false c const n sp in
 	let h1 = get_hyp_name() in	
 	Printf.fprintf c "%stab_all %s (" sp (lookup "10" (coqnorm h) hyp); 
 	(trm_to_coq c n (Variables.make ()) (-1) (-1));
@@ -390,7 +399,7 @@ let rec ref_coq1 c r hyp const sp=
 	Printf.fprintf c "%stab_ex %s %s %s.\n" sp (lookup "12" (coqnorm h) hyp) x h1;
 	ref_coq1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp
  | NegExist(h,s,r1,a,m,n) ->
-	let const = add_fresh_const c const n sp in
+	let const = add_fresh_const false c const n sp in
 	let h1 = get_hyp_name() in	
 	Printf.fprintf c "%stab_negex %s (" sp (lookup "13" (coqnorm h) hyp); 
 	(trm_to_coq c n (Variables.make ()) (-1) (-1));
@@ -447,7 +456,7 @@ let rec ref_coq1 c r hyp const sp=
 	Printf.fprintf c "%stab_fq %s %s.\n" sp (lookup "26" (coqnorm h) hyp) h1;
 	ref_coq1 c r1 ((coqnorm s,h1)::hyp) const  sp
  | ChoiceR(eps,pred,s,t,r1,r2) -> 
-     let const = add_fresh_const c const pred sp in
+     let const = add_fresh_const false c const pred sp in
      let h1 = get_hyp_name() in
      begin
        match eps with
@@ -472,7 +481,7 @@ let rec ref_coq1 c r hyp const sp=
        | _ -> failwith "eps is not a valid epsilon"
      end
  | Cut(s,r1,r2) -> 
-	let const = add_fresh_const c const s sp in
+	let const = add_fresh_const false c const s sp in
 	let h1 = get_hyp_name() in	
 	Printf.fprintf c "%stab_cut (" sp;
 	(trm_to_coq c s (Variables.make ()) (-1) (-1));
@@ -706,7 +715,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const sp
 
     | All(h,s,r1,a,m,n) ->
-	      let const = add_fresh_const c const n sp in
+	      let const = add_fresh_const true c const n sp in
 	      let h1 = get_hyp_name() in
 (*
 	        Printf.fprintf c "%stab_all %s (" sp (lookup "10" (coqnorm h) hyp);
@@ -740,7 +749,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        Printf.fprintf c "\" by (erule TEx)\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp
     | NegExist(h,s,r1,a,m,n) ->
-	      let const = add_fresh_const c const n sp in
+	      let const = add_fresh_const true c const n sp in
 	      let h1 = get_hyp_name() in
 	        (* Printf.fprintf c "%stab_negex %s (" sp (lookup "13" (coqnorm h) hyp); *)
 	        (* (trm_to_coq c n (Variables.make ()) (-1) (-1)); *)
@@ -931,7 +940,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        Printf.fprintf c "%snote %s = TFQ[THEN mp, OF %s]\n" sp h1 (lookup "26" (coqnorm h) hyp);
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const  sp
     | ChoiceR(eps,pred,s,t,r1,r2) ->
-        let const = add_fresh_const c const pred sp in
+        let const = add_fresh_const true c const pred sp in
         let h1 = get_hyp_name() in
           begin
             match eps with
@@ -973,7 +982,7 @@ let rec ref_isabellehol1 c r hyp const sp=
               | _ -> failwith "eps is not a valid epsilon"
           end
     | Cut(s,r1,r2) ->
-	      let const = add_fresh_const c const s sp in
+	      let const = add_fresh_const true c const s sp in
 	      let h1 = get_hyp_name() in
 	        Printf.fprintf c "%stab_cut (" sp;
 	        (trm_to_coq c s (Variables.make ()) (-1) (-1));
@@ -1471,7 +1480,7 @@ let rec ref_tstp1 c r hyp const =
 	let p1 = (lookup_tstp "9" (coqnorm h) hyp) in
 	Printf.fprintf c "thf(%d,plain,$false,inference(tab_nor,[status(thm)%s],[%s,%d%s])).\n" l (info_str "tab_nor" hyp [[h1;h2]]) p1 l1 (disch_str2 [h1;h2]);
     | All(h,s,r1,a,m,n) ->
-	let const = add_fresh_const c const n "" in
+	let const = add_fresh_const false c const n "" in
 	let h1 = get_tstp_hyp_name c (coqnorm s) in
 	let l1 = ref_tstp1 c r1 ((coqnorm s,h1)::hyp) const in
 	let p1 = (lookup_tstp "9" (coqnorm h) hyp) in
@@ -1497,7 +1506,7 @@ let rec ref_tstp1 c r hyp const =
 	let p1 = (lookup_tstp "11" (coqnorm h) hyp) in
 	Printf.fprintf c "thf(%d,plain,$false,inference(tab_ex,[status(thm)%s,tab_ex(eigenvar,%s)],[%s,%d%s])).\n" l (info_str "tab_ex" hyp [[h1]]) (tstpizename x) p1 l1 (disch_str2 [h1])
     | NegExist(h,s,r1,a,m,n) ->
-	let const = add_fresh_const c const n "" in
+	let const = add_fresh_const false c const n "" in
 	let h1 = get_tstp_hyp_name c (coqnorm s) in	
 	let l1 = ref_tstp1 c r1 ((coqnorm s,h1)::hyp) const in
 	let p1 = (lookup_tstp "12" (coqnorm h) hyp) in
@@ -1612,7 +1621,7 @@ let rec ref_tstp1 c r hyp const =
 	let p1 = (lookup_tstp "26" (coqnorm h) hyp) in
 	Printf.fprintf c "thf(%d,plain,$false,inference(tab_fq,[status(thm)%s],[%s,%d%s])).\n" l (info_str "tab_fq" hyp [[h1]]) p1 l1 (disch_str2 [h1])
     | ChoiceR(eps,pred,s,t,r1,r2) -> 
-	let const = add_fresh_const c const pred "" in
+	let const = add_fresh_const false c const pred "" in
 	let h1 = get_tstp_hyp_name c (coqnorm s) in
 	let h2 = get_tstp_hyp_name c (coqnorm t) in
 	begin
@@ -1628,7 +1637,7 @@ let rec ref_tstp1 c r hyp const =
 	  | _ -> failwith "eps is not a valid epsilon"
 	end
     | Cut(s,r1,r2) -> 
-	let const = add_fresh_const c const s "" in
+	let const = add_fresh_const false c const s "" in
 	let h1 = get_tstp_hyp_name c (coqnorm s) in
 	let h2 = get_tstp_hyp_name c (coqnorm (neg s)) in
 	let l1 = ref_tstp1 c r1 ((coqnorm s,h1)::hyp) const in
