@@ -2024,11 +2024,28 @@ module Variables = struct
 	let get i (_,v) = List.nth v i
 end
 
+let isarize_name x =
+  if String.length x > 0 then
+    if String.get x 0 = '_' then
+      "eigen" ^ x
+    else if String.get x 0 = '@' then
+      String.sub x 1 ((String.length x) - 1)
+    else
+      if (String.length x > 5 && String.sub x 0 5 = "eigen") then
+        "not" ^ x
+      else
+        (*Rename constants to avoid clashes with keywords*)
+        let x =
+          try Hashtbl.find coq_names x with
+              Not_found -> x
+        in x
+  else failwith "Name cannot have zero length"
+
 (*FIXME next batch of functions are adapted from the TSTP functions*)
 let rec trm_to_isar c m bound =
   match m with
       Name(x,_) -> (* Definitions *)
-        Printf.fprintf c "%s" (tstpizename x)
+        Printf.fprintf c "%s" (isarize_name x)
     | False -> (* Bottom *)
 	      Printf.fprintf c "False"
     | Ap(Ap(Imp,m1),False) ->  (* Negation *)
