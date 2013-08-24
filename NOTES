@@ -1,0 +1,17 @@
+Satallax 2.7-isar
+
+Fork of Satallax 2.7 with capability to produce Isar scripts for Satallax refutations.
+
+Bulding: follow Satallax instructions.
+
+License: unchanged from Satallax (check requirements).
+
+Notes:
+* Not all tab_ rules are currently handled.
+* Fix the bit which disables Coq proofs; need to be able to output either proofs, on user's command.
+* Hardcoded Isar code.
+* Duplication of Coq code.
+* Relying on Coq code for normalisation -- but this seems to be good enough. Perhaps should rename.
+* Testing is a bit inconvenient.
+
+Ack: Chad Brown
