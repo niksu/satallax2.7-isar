@@ -608,8 +608,9 @@ let rec ref_isabellehol1 c r hyp const sp=
     | Conflict(s,ns) ->
 	      (* Printf.fprintf c "%stab_conflict %s %s.\n" sp (lookup "0" (coqnorm s) hyp) (lookup "1" (coqnorm ns) hyp) *)
 	      Printf.fprintf c "%sfrom %s %s show ?thesis by blast\n" sp (lookup "0" (coqnorm s) hyp) (lookup "1" (coqnorm ns) hyp)
-    | Fal(_) -> (*TODO*) 
-	      Printf.fprintf c "%stab_false %s.\n" sp (lookup "2" False hyp)
+    | Fal(_) ->
+	      (* Printf.fprintf c "%stab_false %s.\n" sp (lookup "2" False hyp) *)
+        Printf.fprintf c "%sfrom %s show False by blast\n" sp (lookup "2" False hyp);
     | NegRefl(s) ->
 	      (* Printf.fprintf c "%stab_refl %s.\n" sp (lookup "3" (coqnorm s) hyp) *)
 	      Printf.fprintf c "%sfrom %s have False by blast (*tab_refl*)\n" sp (lookup "3" (coqnorm s) hyp);
