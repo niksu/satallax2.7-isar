@@ -1,0 +1,5 @@
+#!/bin/bash
+FILE=$1
+
+echo "testing ${FILE}"
+${LEO2}/bin/TreeLimitedRun 5 5 ./bin/satallax -p isar ${FILE} | grep tab | grep -v '(*tab'
