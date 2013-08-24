@@ -608,7 +608,7 @@ let rec ref_isabellehol1 c r hyp const sp=
     | Conflict(s,ns) ->
 	      (* Printf.fprintf c "%stab_conflict %s %s.\n" sp (lookup "0" (coqnorm s) hyp) (lookup "1" (coqnorm ns) hyp) *)
 	      Printf.fprintf c "%sfrom %s %s show ?thesis by blast\n" sp (lookup "0" (coqnorm s) hyp) (lookup "1" (coqnorm ns) hyp)
-    | Fal(_) ->
+    | Fal(_) -> (*TODO*) 
 	      Printf.fprintf c "%stab_false %s.\n" sp (lookup "2" False hyp)
     | NegRefl(s) ->
 	      (* Printf.fprintf c "%stab_refl %s.\n" sp (lookup "3" (coqnorm s) hyp) *)
@@ -760,7 +760,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        trm_to_isar c (coqnorm n) (Variables.make ());
 	        Printf.fprintf c "\"]\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp
-    | Mating(h1,h2, ss, rs) ->
+    | Mating(h1,h2, ss, rs) -> (*TODO*) 
 	      let h3 = get_hyp_name() in
 	        Printf.fprintf c "%stab_mat %s %s %s.\n" sp (lookup "14" (coqnorm h1) hyp) (lookup "15" (coqnorm h2) hyp) h3;
 	        List.iter (fun (s,r) -> ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const (sp^" ")) (List.combine ss rs)
@@ -840,13 +840,13 @@ let rec ref_isabellehol1 c r hyp const sp=
           Printf.fprintf c "%sqed\n" sp';
           Printf.fprintf c "%sthus ?thesis by blast\n" sp';
 
-    | Confront(h1,h2,su,tu,sv,tv,r1,r2) ->
+    | Confront(h1,h2,su,tu,sv,tv,r1,r2) -> (*TODO*) 
 	      let h3 = get_hyp_name() in
 	      let h4 = get_hyp_name() in
 	        Printf.fprintf c "%stab_con %s %s %s %s.\n" sp (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp) h3 h4;
 	        ref_isabellehol1 c r1 ((coqnorm su,h3)::(coqnorm tu,h4)::hyp) const (sp^" ");
 	        ref_isabellehol1 c r2 ((coqnorm sv,h3)::(coqnorm tv,h4)::hyp) const (sp^" ");
-    | Trans(h1,h2,su,r1) ->
+    | Trans(h1,h2,su,r1) -> (*TODO*) 
 	      let h3 = get_hyp_name() in
 	        Printf.fprintf c "%stab_trans %s %s %s.\n" sp (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp) h3;
 	        ref_isabellehol1 c r1 ((coqnorm su,h3)::hyp) const (sp^" ");
@@ -885,7 +885,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
           Printf.fprintf c "%sthus ?thesis by blast\n" sp';
-    | EqualProp(h,s,t,r1,r2) ->
+    | EqualProp(h,s,t,r1,r2) -> (*TODO*) 
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
 	        Printf.fprintf c "%stab_bq %s %s %s.\n" sp (lookup "22" (coqnorm h) hyp) h1 h2;
@@ -923,7 +923,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm t,h2)::hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
           Printf.fprintf c "%sthus ?thesis by blast\n" sp';
-    | Aequivalenz(h,s,t,r1,r2) ->
+    | Aequivalenz(h,s,t,r1,r2) -> (*TODO*) 
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
 	        Printf.fprintf c "%stab_iff %s %s %s.\n" sp (lookup "24" (coqnorm h) hyp) h1 h2;
@@ -969,7 +969,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                  print_stp_isar c a true;
                     Printf.fprintf c "\" and p = %s, THEN mp], rule impI, insert %s, blast)\n" termname (String.concat " " (List.map snd hyp));
 	                  ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp ^ " ");
-              | Name(x,Ar(Ar(a,Prop),_)) ->
+              | Name(x,Ar(Ar(a,Prop),_)) -> (*TODO*) 
 	                Printf.fprintf c "%stab_choice' " sp;
 	                print_stp_coq c a coq_names true;
 	                Printf.fprintf c " (";
@@ -981,7 +981,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
               | _ -> failwith "eps is not a valid epsilon"
           end
-    | Cut(s,r1,r2) ->
+    | Cut(s,r1,r2) -> (*TODO*) 
 	      let const = add_fresh_const true c const s sp in
 	      let h1 = get_hyp_name() in
 	        Printf.fprintf c "%stab_cut (" sp;
@@ -1003,7 +1003,8 @@ let rec ref_isabellehol1 c r hyp const sp=
 	      let h2 = get_hyp_name() in
 	        begin
 	          match pt with
-		          | True -> 	Printf.fprintf c "%stab_rew_true %s %s (" sp h1 h2;
+		          | True -> (*TODO*) 
+                  Printf.fprintf c "%stab_rew_true %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | And ->
                   (*
@@ -1022,7 +1023,8 @@ let rec ref_isabellehol1 c r hyp const sp=
 				          trm_to_isar c prefix (Variables.make ());
                   Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% x y. ((~ x) --> y)\", THEN mp, OF eq_or_imp]\n" h1;
 
-		          | Iff -> 	Printf.fprintf c "%stab_rew_iff %s %s (" sp h1 h2;
+		          | Iff -> (*TODO*) 
+                  Printf.fprintf c "%stab_rew_iff %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | Exists(_) ->
                   (* Printf.fprintf c "%stab_rew_ex %s %s (" sp h1 h2; *)
@@ -1034,9 +1036,10 @@ let rec ref_isabellehol1 c r hyp const sp=
                     Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"%% p. ? x. p x\", THEN spec, of \"" sp h2;
 				            trm_to_isar c prefix (Variables.make ());
                     Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% p. ~ (! x. ~ p x)\", THEN mp, OF eq_exists_nforall]\n" h1;
-		          | Eq(_) -> 	Printf.fprintf c "%stab_rew_sym %s %s (" sp h1 h2;
+		          | Eq(_) -> (*TODO*) 
+                  Printf.fprintf c "%stab_rew_sym %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Lam(_,Lam(_,Ap(DB(1,_),DB(0,_)))) ->
+		          | Lam(_,Lam(_,Ap(DB(1,_),DB(0,_)))) -> (*TODO*) 
 				          Printf.fprintf c "%stab_rew_eta %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | Lam(Ar(Prop,Prop),Ap(Ap(Imp,Ap(Ap(Imp,DB(0,Prop)),False)),False)) ->
@@ -1047,16 +1050,16 @@ let rec ref_isabellehol1 c r hyp const sp=
                   Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"%% x. ~ ~ x\", THEN spec, of \"" sp h2;
 				          trm_to_isar c prefix (Variables.make ());
                   Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% x . x\", THEN mp, OF eq_neg_neg_id]\n" h1;
-		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(DB(0,_),DB(2,_)))),(Ap(DB(0,_),DB(1,_)))) ))) )) ->
+		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(DB(0,_),DB(2,_)))),(Ap(DB(0,_),DB(1,_)))) ))) )) -> (*TODO*) 
 				          Printf.fprintf c "%stab_rew_leib1 %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,Ap(Ap(Imp,(Ap(DB(0,_),DB(2,_)))),False)),Ap(Ap(Imp,(Ap(DB(0,_),DB(1,_)))),False)) ))) )) ->
+		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,Ap(Ap(Imp,(Ap(DB(0,_),DB(2,_)))),False)),Ap(Ap(Imp,(Ap(DB(0,_),DB(1,_)))),False)) ))) )) -> (*TODO*) 
 				          Printf.fprintf c "%stab_rew_leib2 %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(Forall(_),Lam(_,(Ap(Ap(DB(1,_),DB(0,_)),DB(0,_)))))) ),(Ap(Ap(DB(0,_),DB(2,_)),DB(1,_)))) ) )) )) ->
+		          | Lam(_,Lam(_,Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(Forall(_),Lam(_,(Ap(Ap(DB(1,_),DB(0,_)),DB(0,_)))))) ),(Ap(Ap(DB(0,_),DB(2,_)),DB(1,_)))) ) )) )) -> (*TODO*) 
 				          Printf.fprintf c "%stab_rew_leib3 %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Lam(_,Lam(_, Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(Ap(Imp,(Ap(Ap(DB(0,_),DB(2,_)),DB(1,_)))),False) )),(Ap(Ap(Imp,(Ap(Forall(_),Lam(_,(Ap(Ap(DB(1,_),DB(0,_)),DB(0,_))))) )),False) )) ) )) )) ->
+		          | Lam(_,Lam(_, Ap(Forall(_),Lam(_,(Ap(Ap(Imp,(Ap(Ap(Imp,(Ap(Ap(DB(0,_),DB(2,_)),DB(1,_)))),False) )),(Ap(Ap(Imp,(Ap(Forall(_),Lam(_,(Ap(Ap(DB(1,_),DB(0,_)),DB(0,_))))) )),False) )) ) )) )) -> (*TODO*) 
 				          Printf.fprintf c "%stab_rew_leib4 %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
 		          | _ -> failwith("unknown rewrite step found in ref_coq" ^ (trm_str pt))
