@@ -760,10 +760,79 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        trm_to_isar c (coqnorm n) (Variables.make ());
 	        Printf.fprintf c "\"]\n";
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp
-    | Mating(h1,h2, ss, rs) -> (*TODO*) 
+    | Mating(h1,h2, ss, rs) ->
+        assert ( ((neg_p h1) || (neg_p h2)) && not ((neg_p h1) && (neg_p h2)));
 	      let h3 = get_hyp_name() in
-	        Printf.fprintf c "%stab_mat %s %s %s.\n" sp (lookup "14" (coqnorm h1) hyp) (lookup "15" (coqnorm h2) hyp) h3;
-	        List.iter (fun (s,r) -> ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const (sp^" ")) (List.combine ss rs)
+	        (* Printf.fprintf c "%stab_mat %s %s %s.\n" sp (lookup "14" (coqnorm h1) hyp) (lookup "15" (coqnorm h2) hyp) h3; *)
+	        (* List.iter (fun (s,r) -> ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const (sp^" ")) (List.combine ss rs) *)
+
+          (*
+            This rule seems to combine resolution with decomposition. It takes two facts "p s1 sn" and "~ q t1 tn"
+            then we obtain a refutation by showing that "p = q" and "si = ti" for all i.
+            Satallax's Coq reconstruction reduces this to decomposition (see the ltac definition for tab_mat) but
+            we treat the whole mating here (mainly because we cannot rely on the compositionality of Satallax's approach
+            in Coq for the time being).
+          *)
+
+        let (neg_hyp, pos_hyp) =
+          if neg_p h1 then (h1, h2) else (h2, h1) in
+
+    (*FIXME mostly duplicated from tab_dec*)
+        let card = List.length ss in
+        let proof_step_str =
+          if card > 1 then
+            "proof"
+          else
+            "proof -" in
+        let sp' = sp ^ "  " in
+        let sp'' = sp' ^ "  " in
+        let fresh_fact_name = get_fresh_name () in
+        let head = (*NOTE this was changed from tab_dec*)
+          match neg_body neg_hyp(*this was h1 in tab_dec*) with
+              Some h1' -> fst (bounded_head_spine card h1')
+            | _ -> failwith "Could not determine head expression during Isar translation.2" in
+        let indices = countup 0 card [] in
+        let (custom_dec_prefix, custom_dec_suffix) =
+          let (prefix, diseqs) =
+            List.split (List.map (fun i ->
+              ("s" ^ string_of_int i ^ " t" ^ string_of_int i,
+               "(s" ^ string_of_int i ^ " ~= t" ^ string_of_int i ^ ")"))
+              indices)
+          in
+            ("have " ^ fresh_fact_name ^ " : \"!! " ^ String.concat " " prefix ^ ". [|",
+             "|] ==> " ^ String.concat " | " diseqs ^ "\" by blast") in
+        (*FIXME this bit would be less of a mess if we use sprintf instead of printf*)
+        let print_diseq () = (*NOTE this function was changed from that in the tab_dec handler*)
+          let side v = " " ^ String.concat " " (List.map (fun i -> v ^ string_of_int i) indices)
+          in
+            trm_to_isar c head (Variables.make ());
+	          Printf.fprintf c "%s" (side "s");
+	          Printf.fprintf c "; ~ "; (*NOTE interesting that in Leo2 resolution covers the functionality of mating*)
+            trm_to_isar c head (Variables.make ());
+	          Printf.fprintf c "%s" (side "t");
+        in
+	        Printf.fprintf c "%s%s" sp custom_dec_prefix;
+          print_diseq ();
+	        Printf.fprintf c "%s\n" custom_dec_suffix;
+	        Printf.fprintf c "%snote %s = %s[OF %s, OF %s]\n" sp h3 fresh_fact_name (lookup "14" (coqnorm pos_hyp) hyp) (lookup "15" (coqnorm neg_hyp) hyp); (*NOTE this line of the tab_dec handler was changed*)
+	        Printf.fprintf c "%sfrom %s have False\n" sp h3;
+          Printf.fprintf c "%s%s\n" sp' proof_step_str;
+
+	        ignore(List.fold_right
+            (fun (s, r) remaining ->
+               Printf.fprintf c "%sassume %s : \"" sp'' h3;
+	             trm_to_isar c (coqnorm s) (Variables.make ());
+               Printf.fprintf c "\"\n";
+               ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const sp'';
+
+               if remaining > 1 then Printf.fprintf c "%snext\n" sp';
+
+               remaining - 1)
+            (List.combine ss rs)
+            card);
+
+          Printf.fprintf c "%sqed\n" sp';
+          Printf.fprintf c "%sthus ?thesis by blast\n" sp';
     | Decomposition(h1, ss, rs) ->
 	      let h3 = get_hyp_name() in
 	        (* Printf.fprintf c "%stab_dec %s %s.\n" sp (lookup "16" (coqnorm h1) hyp) h3; *)
