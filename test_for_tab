@@ -1,5 +1,15 @@
 #!/bin/bash
-FILE=$1
+# Ad hoc and crude testing for Isar proof-generating feature in Satallax,
+# to discover occurrence of unhandled Refutation rules in proofs of some body of TPTP
+# problems.
+# Nik Sultana, Cambridge University Computer Lab, August 2013
+#
+# Example usage: awk '{ print $2 }' THF_550_sizes | xargs -I X ./src/test_for_tab 60 X > un_tabbed
+#
+# Requires Geoff Sutcliffe's TreeLimitedRun.
+# Assumes setting of the LEO2 and SATALLAX_BIN environment variables.
 
+TIME=$1
+FILE=$2
 echo "testing ${FILE}"
-${LEO2}/bin/TreeLimitedRun 5 5 ./bin/satallax -p isar ${FILE} | grep tab | grep -v '(*tab'
+${LEO2}/bin/TreeLimitedRun ${TIME} ${TIME} ${SATALLAX_BIN} -p isar ${FILE} | grep tab | grep -v '*tab' | grep -v "Require Import"
