@@ -15,6 +15,3 @@ Notes:
 * Testing is a bit inconvenient.
 
 Ack: Chad Brown
-
-Testing, to discover currently-unhandled tab_* rules:
-awk '{ print $2 }' ~/xoghol/isabelle-thf/TPTP_550_sizes | xargs -I X ./test_for_tab X
