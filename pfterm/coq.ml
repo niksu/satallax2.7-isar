@@ -1106,9 +1106,12 @@ let rec ref_isabellehol1 c r hyp const sp=
 		          | Eq(_) -> (*TODO*) 
                   Printf.fprintf c "%stab_rew_sym %s %s (" sp h1 h2;
 				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
-		          | Lam(_,Lam(_,Ap(DB(1,_),DB(0,_)))) -> (*TODO*) 
-				          Printf.fprintf c "%stab_rew_eta %s %s (" sp h1 h2;
-				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+		          | Lam(_,Lam(_,Ap(DB(1,_),DB(0,_)))) ->
+				          (* Printf.fprintf c "%stab_rew_eta %s %s (" sp h1 h2; *)
+				          (* (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n"; *)
+                  Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"%% f x. f x\", THEN spec, of \"" sp h2;
+				          trm_to_isar c prefix (Variables.make ());
+                  Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% f. f\", THEN mp, OF eq_eta]\n" h1;
 		          | Lam(Ar(Prop,Prop),Ap(Ap(Imp,Ap(Ap(Imp,DB(0,Prop)),False)),False)) ->
                   (*
 				          Printf.fprintf c "%stab_rew_dn %s %s (" sp h1 h2;
