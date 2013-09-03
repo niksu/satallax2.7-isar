@@ -1087,10 +1087,12 @@ let rec ref_isabellehol1 c r hyp const sp=
                   Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"(op |)\", THEN spec, of \"" sp h2;
 				          trm_to_isar c prefix (Variables.make ());
                   Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"%% x y. ((~ x) --> y)\", THEN mp, OF eq_or_imp]\n" h1;
-
-		          | Iff -> (*TODO*) 
-                  Printf.fprintf c "%stab_rew_iff %s %s (" sp h1 h2;
-				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+		          | Iff ->
+                  (* Printf.fprintf c "%stab_rew_iff %s %s (" sp h1 h2; *)
+				          (* (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n"; *)
+                  Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"(op =)\", THEN spec, of \"" sp h2;
+				          trm_to_isar c prefix (Variables.make ());
+                  Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"(op =)\", THEN mp, OF eq_iff]\n" h1;
 		          | Exists(_) ->
                   (* Printf.fprintf c "%stab_rew_ex %s %s (" sp h1 h2; *)
 				          (* (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n"; *)
