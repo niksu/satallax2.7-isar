@@ -995,19 +995,25 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
               | _ -> failwith "eps is not a valid epsilon"
           end
-    | Cut(s,r1,r2) -> (*TODO*) 
+    | Cut(s,r1,r2) ->
 	      let const = add_fresh_const true c const s sp in
 	      let h1 = get_hyp_name() in
-	        Printf.fprintf c "%stab_cut (" sp;
-	        (trm_to_coq c s (Variables.make ()) (-1) (-1));
-	        Printf.fprintf c ") %s.\n" h1;
-	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::hyp) const (sp^" ");
-	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
+	        (* Printf.fprintf c "%stab_cut (" sp; *)
+	        (* (trm_to_coq c s (Variables.make ()) (-1) (-1)); *)
+	        (* Printf.fprintf c ") %s.\n" h1; *)
+	        (* ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::hyp) const (sp^" "); *)
+	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" "); *)
+        let termname = "?" ^ get_fresh_name ()
+        in
+	        Printf.fprintf c "%slet %s = \"" sp termname;
+	        trm_to_isar c s (Variables.make ());
+	        Printf.fprintf c "\"\n";
+	        Printf.fprintf c "%shave %s : \"~ %s | %s\" by blast (*tab_cut*)\n" sp h1 termname termname;
+          tab_disj c (((coqnorm (disj (neg s) s)), h1) :: hyp) h1 (neg s) s r2 r1
     | DoubleNegation(h,s,r1) ->
 	      let h1 = get_hyp_name() in
 	        (* Printf.fprintf c "%stab_dn %s %s.\n" sp (lookup "27" (coqnorm h) hyp) h1; *)
 	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp; *)
-
 	        Printf.fprintf c "%snote %s = notnotD[OF %s]\n" sp h1 (lookup "27" (coqnorm h) hyp);
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const sp;
     | Rewrite(prefix,pt,pt',r1) ->
