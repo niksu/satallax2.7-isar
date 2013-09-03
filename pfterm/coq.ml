@@ -897,12 +897,52 @@ let rec ref_isabellehol1 c r hyp const sp=
 
           Printf.fprintf c "%sqed\n" sp';
           Printf.fprintf c "%sthus ?thesis by blast\n" sp';
-    | Confront(h1,h2,su,tu,sv,tv,r1,r2) -> (*TODO*) 
+    | Confront(h1,h2,su,tu,sv,tv,r1,r2) ->
 	      let h3 = get_hyp_name() in
 	      let h4 = get_hyp_name() in
-	        Printf.fprintf c "%stab_con %s %s %s %s.\n" sp (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp) h3 h4;
-	        ref_isabellehol1 c r1 ((coqnorm su,h3)::(coqnorm tu,h4)::hyp) const (sp^" ");
-	        ref_isabellehol1 c r2 ((coqnorm sv,h3)::(coqnorm tv,h4)::hyp) const (sp^" ");
+	        (* Printf.fprintf c "%stab_con %s %s %s %s.\n" sp (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp) h3 h4; *)
+	        (* ref_isabellehol1 c r1 ((coqnorm su,h3)::(coqnorm tu,h4)::hyp) const (sp^" "); *)
+	        (* ref_isabellehol1 c r2 ((coqnorm sv,h3)::(coqnorm tv,h4)::hyp) const (sp^" "); *)
+
+        let fresh_fact_name = get_fresh_name () in
+          (*FIXME should also try symmetric equation*)
+	        Printf.fprintf c "%snote %s = TCON[OF %s, OF %s](*tab_con*)\n" sp fresh_fact_name (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp);
+
+          (*FIXME this next bit is dirty -- might be better to adapt tab_disj2*)
+          Printf.fprintf c "%sfrom %s have False\n" sp fresh_fact_name;
+          Printf.fprintf c "%sproof\n" sp;
+          Printf.fprintf c "%sassume %s : \"" sp' fresh_fact_name;
+          Printf.fprintf c "(";
+          trm_to_isar c (coqnorm su) (Variables.make ());
+          Printf.fprintf c ") & (";
+          trm_to_isar c (coqnorm tu) (Variables.make ());
+          Printf.fprintf c ")";
+          Printf.fprintf c "\"\n";
+          Printf.fprintf c "%sfrom %s have %s : \"" sp' fresh_fact_name h3;
+          trm_to_isar c (coqnorm su) (Variables.make ());
+          Printf.fprintf c "\" by blast\n";
+          Printf.fprintf c "%sfrom %s have %s : \"" sp' fresh_fact_name h4;
+          trm_to_isar c (coqnorm tu) (Variables.make ());
+          Printf.fprintf c "\" by blast\n";
+          ref_isabellehol1 c r1 ((coqnorm su, h3) :: (coqnorm tu, h4) :: hyp) const sp'';
+
+          Printf.fprintf c "%snext\n" sp';
+          Printf.fprintf c "%sassume %s : \"" sp' fresh_fact_name;
+          Printf.fprintf c "(";
+          trm_to_isar c (coqnorm sv) (Variables.make ());
+          Printf.fprintf c ") & (";
+          trm_to_isar c (coqnorm tv) (Variables.make ());
+          Printf.fprintf c ")";
+          Printf.fprintf c "\"\n";
+          Printf.fprintf c "%sfrom %s have %s : \"" sp' fresh_fact_name h3;
+          trm_to_isar c (coqnorm sv) (Variables.make ());
+          Printf.fprintf c "\" by blast\n";
+          Printf.fprintf c "%sfrom %s have %s : \"" sp' fresh_fact_name h4;
+          trm_to_isar c (coqnorm tv) (Variables.make ());
+          Printf.fprintf c "\" by blast\n";
+          ref_isabellehol1 c r2 ((coqnorm sv, h3) :: (coqnorm tv, h4) :: hyp) const sp'';
+          Printf.fprintf c "%sqed\n" sp';
+          Printf.fprintf c "%sthus ?thesis by blast\n" sp'
     | Trans(h1,h2,su,r1) -> (*TODO*) 
 	      let h3 = get_hyp_name() in
 	        Printf.fprintf c "%stab_trans %s %s %s.\n" sp (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp) h3;
