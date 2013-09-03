@@ -1065,9 +1065,12 @@ let rec ref_isabellehol1 c r hyp const sp=
 	      let h2 = get_hyp_name() in
 	        begin
 	          match pt with
-		          | True -> (*TODO*) 
-                  Printf.fprintf c "%stab_rew_true %s %s (" sp h1 h2;
-				          (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n";
+		          | True ->
+                  (* Printf.fprintf c "%stab_rew_true %s %s (" sp h1 h2; *)
+				          (* (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n"; *)
+                  Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"True\", THEN spec, of \"" sp h2;
+				          trm_to_isar c prefix (Variables.make ());
+                  Printf.fprintf c "\", THEN mp, OF %s, THEN spec, of \"~ False\", THEN mp, OF eq_true]\n" h1;
 		          | And ->
                   (*
                   Printf.fprintf c "%stab_rew_and %s %s (" sp h1 h2;
