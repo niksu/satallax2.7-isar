@@ -942,6 +942,8 @@ let coq_init () =
     Hashtbl.add coq_used_names "claim" ();
 
     (*FIXME add isar keywords*)
+    Hashtbl.add coq_used_names "thm" ();
+    Hashtbl.add coq_used_names "lemma" ();
   end
 
 let print_coqsig c =
