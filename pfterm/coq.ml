@@ -937,12 +937,14 @@ let rec ref_isabellehol1 c r hyp const sp=
 	      let h2 = get_hyp_name() in
 	        Printf.fprintf c "%snote %s = TNIff[rule_format, OF %s](*tab_negiff*)\n" sp h1 (lookup "23" (coqnorm h) hyp);
           tab_disj2 c hyp h1 h2 (s, neg t) (neg s, t) r1 r2
-    | Aequivalenz(h,s,t,r1,r2) -> (*TODO*) 
+    | Aequivalenz(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
 	      let h2 = get_hyp_name() in
-	        Printf.fprintf c "%stab_iff %s %s %s.\n" sp (lookup "24" (coqnorm h) hyp) h1 h2;
-	        ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const (sp^" ");
-	        ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm (neg t),h2)::hyp) const (sp^" ");
+	        (* Printf.fprintf c "%stab_iff %s %s %s.\n" sp (lookup "24" (coqnorm h) hyp) h1 h2; *)
+	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::(coqnorm t,h2)::hyp) const (sp^" "); *)
+	        (* ref_isabellehol1 c r2 ((coqnorm (neg s),h1)::(coqnorm (neg t),h2)::hyp) const (sp^" "); *)
+	        Printf.fprintf c "%snote %s = TIff[rule_format, OF %s](*tab_iff*)\n" sp h1 (lookup "24" (coqnorm h) hyp);
+          tab_disj2 c hyp h1 h2 (s, t) (neg s, neg t) r1 r2
     | NegEqualFunc(h,s,r1) ->
 	      let h1 = get_hyp_name() in
 	        (* Printf.fprintf c "%stab_fe %s %s.\n" sp (lookup "25" (coqnorm h) hyp) h1; *)
