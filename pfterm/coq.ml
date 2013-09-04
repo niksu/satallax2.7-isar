@@ -683,7 +683,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        (* Printf.fprintf c "%stab_nand %s %s.\n" sp (lookup "6" (coqnorm h) hyp) h1; *)
 	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" "); *)
 	        (* ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" "); *)
-	        Printf.fprintf c "%snote %s = %s(*tab_nand*)\n" sp h1 (lookup "6" (coqnorm h) hyp);
+	        Printf.fprintf c "%snote %s = TNAnd[rule_format, OF %s](*tab_nand*)\n" sp h1 (lookup "6" (coqnorm h) hyp);
           tab_disj c hyp h1 s t r1 r2
     | NegImplication(h,s,t,r1) ->
 	      let h1 = get_hyp_name() in
