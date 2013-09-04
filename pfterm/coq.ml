@@ -941,9 +941,14 @@ let rec ref_isabellehol1 c r hyp const sp=
           ref_isabellehol1 c r2 ((coqnorm sv, h3) :: (coqnorm tv, h4) :: hyp) const sp'';
           Printf.fprintf c "%sqed\n" sp';
           Printf.fprintf c "%sthus ?thesis by blast\n" sp'
-    | Trans(h1,h2,su,r1) -> (*TODO*) 
+    | Trans(h1,h2,su,r1) ->
 	      let h3 = get_hyp_name() in
-	        Printf.fprintf c "%stab_trans %s %s %s.\n" sp (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp) h3;
+	        (* Printf.fprintf c "%stab_trans %s %s %s.\n" sp (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp) h3; *)
+	        Printf.fprintf c "%s(*FIXME only one out of the next four lines should be used --- comment the others out.*)\n" sp;
+	        Printf.fprintf c "%snote %s = Ttrans[rule_format, OF %s, OF %s]\n" sp h3 (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp);
+	        Printf.fprintf c "%snote %s = Ttrans[rule_format, OF %s[symmetric], OF %s]\n" sp h3 (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp);
+	        Printf.fprintf c "%snote %s = Ttrans[rule_format, OF %s, OF %s[symmetric]]\n" sp h3 (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp);
+	        Printf.fprintf c "%snote %s = Ttrans[rule_format, OF %s[symmetric], OF %s[symmetric]]\n" sp h3 (lookup "19" (coqnorm h1) hyp) (lookup "20" (coqnorm h2) hyp);
 	        ref_isabellehol1 c r1 ((coqnorm su,h3)::hyp) const (sp^" ");
     | NegEqualProp(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
