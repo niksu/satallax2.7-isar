@@ -13,5 +13,12 @@ Notes:
 * Duplication of Coq code.
 * Relying on Coq code for normalisation -- but this seems to be good enough. Perhaps should rename.
 * Testing is a bit inconvenient.
+* Sometimes blast isn't strong enough. For instance when run
+    ./bin/satallax -m mode188 -p isar /home/nik/TPTP-v5.5.0/Problems/SYO/SYO277^5.p
+   get this step
+      from H1 obtain eigen__0 where H5 : "(~((! X1::i. ((! X2::(i=>o). ((X2 eigen__0) --> (X2 X1))) = (! X2::(i=>(i=>o)). ((! X3::i. ((X2 X3) X3)) --> ((X2 eigen__0) X1)))))))" by blast
+   but "blast" takes ages. Replacing it with "auto" works fine.
+* Add comments making clear which rule used when this isn't obvious.
+* Sometimes Satallax's Coq output does some search (e.g., through use of "||"-branching). Currently this isn't automated in the Isar output -- instead the user needs to edit the script manually. (The script will include comments drawing the user's attention to this.)
 
 Ack: Chad Brown
