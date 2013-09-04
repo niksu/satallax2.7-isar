@@ -754,6 +754,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        Printf.fprintf c "\"]\n";
 	        ref_isabellehol1 c r1 ((coqnorm s, h1) :: hyp) const sp
     | Mating(h1,h2, ss, rs) ->
+        (*FIXME in the Coq code for tab_mat we also try swapping H1 and H2. Currently we don't emulate that here.*)
         assert ( ((neg_p h1) || (neg_p h2)) && not ((neg_p h1) && (neg_p h2)));
 	      let h3 = get_hyp_name() in
 	        (* Printf.fprintf c "%stab_mat %s %s %s.\n" sp (lookup "14" (coqnorm h1) hyp) (lookup "15" (coqnorm h2) hyp) h3; *)
@@ -828,7 +829,6 @@ let rec ref_isabellehol1 c r hyp const sp=
 	      let h3 = get_hyp_name() in
 	        (* Printf.fprintf c "%stab_dec %s %s.\n" sp (lookup "16" (coqnorm h1) hyp) h3; *)
 	        (* List.iter (fun (s,r) -> ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const (sp^" ")) (List.combine ss rs) *)
-
         let card = List.length ss in
         let proof_step_str =
           if card > 1 then
@@ -903,10 +903,8 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        (* Printf.fprintf c "%stab_con %s %s %s %s.\n" sp (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp) h3 h4; *)
 	        (* ref_isabellehol1 c r1 ((coqnorm su,h3)::(coqnorm tu,h4)::hyp) const (sp^" "); *)
 	        (* ref_isabellehol1 c r2 ((coqnorm sv,h3)::(coqnorm tv,h4)::hyp) const (sp^" "); *)
-
         let fresh_fact_name = get_fresh_name () in
-          (*FIXME should also try symmetric equation*)
-	        Printf.fprintf c "%snote %s = TCON[OF %s, OF %s](*tab_con*)\n" sp fresh_fact_name (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp);
+	        Printf.fprintf c "%snote %s = TCON[OF %s, OF %s](*FIXME should also try swapping the previous OFs*)(*tab_con*)\n" sp fresh_fact_name (lookup "17" (coqnorm h1) hyp) (lookup "18" (coqnorm h2) hyp);
 
           (*FIXME this next bit is dirty -- might be better to adapt tab_disj2*)
           Printf.fprintf c "%sfrom %s have False\n" sp fresh_fact_name;
