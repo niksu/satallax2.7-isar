@@ -1,0 +1,80 @@
+Satallax Version 2.7
+Released:
+Mon Apr 15 14:07:37 CEST 2013
+
+See INSTALL for installation instructions.
+
+Satallax can be called as follows:
+
+SATALLAXBINARY -t %d %s
+
+where
+SATALLAXBINARY is the satallax executable (satallax.opt [native code, preferable] or satallax [bytecode], possibly with a full path)
+%d is the timeout in seconds
+%s is the problem file (possibly with a full path).
+
+The exit status of the satallax binary should be one of the following:
+
+1  : Error - missing arguments, problem or mode
+2  : Error processing THF of problem (e.g., ill-typed axiom, multiple conjectures, etc.)
+3  : Unclassified error.
+5  : Timed out
+10 : CounterSatisfiable (Satisfiable with conjecture/theorem negated)
+15 : Satisfiable (Satisfiable where no conjecture/theorem was given)
+20 : Theorem (Unsatisfiable with conjecture/theorem negated)
+25 : Unsatisfiable (Unsatisfiable where no conjecture/theorem was given)
+26 : Theorem or Unsatisfiable, *but* a proof was requested and cannot be produced.
+
+See SZS Ontology:
+http://www.cs.miami.edu/~tptp/cgi-bin/SeeTPTP?Category=Documents&File=SZSOntology
+
+It also reports the SZS status in one of the following lines corresponding to the following exit status.
+
+2  : Error processing THF of problem (e.g., ill-typed axiom, multiple conjectures, etc.)
+-- FAILED! Error (THF Error)
+3  : Unclassified error.
+-- FAILED! Error
+5  : Timed out
+-- FAILED!  Timeout
+10 : CounterSatisfiable (Satisfiable with conjecture/theorem negated)
+++ SUCCESS! CounterSatisfiable
+15 : Satisfiable (Satisfiable where no conjecture/theorem was given)
+++ SUCCESS! Satisfiable
+20 : Theorem (Unsatisfiable with conjecture/theorem negated)
++- SUCCESS! Theorem Proven
+25 : Unsatisfiable (Unsatisfiable where no conjecture/theorem was given)
++- SUCCESS! Unsatisfiable
+
+There are tests in the script file: test.
+
+-E <eproverexecutable> :
+Some modes will call the first-order theorem prover E.
+The location of the E prover may be given before compiling (by editing the configure file or src/config.ml if necessary)
+or may be given at runtime using -E <eproverexecutable> on the command line.
+
+Obtaining Coq proof scripts:
+
+Satallax can create Coq versions of the problems and (sometimes) solutions.
+Satallax currently supports Coq 8.4.  The interface with Coq is via a shallow encoding
+of simple type theory (see coq/stt.v) and tactics corresponding to the higher order tableau calculus (see coq/stttab.v).
+
+The option -c file.v tells Satallax to create a Coq version of the problem and puts it into file.v.
+
+The option -p tells Satallax to give some proof information if proof search is successful.
+-p hocore : Give the higher-order core. That is, list the axioms that were used -- and the conjecture if its negation was used.
+-p coqscript : Generate a Coq proof script (using the tactics in coq/stttab.v).
+-p coqsrefterm : Generate a (refutation style) Coq proof term (using -nois and the files in coq2/stt*.v and coq2/set*.v)
+-p coqspfterm : This is currently the same as coqsrefterm, but in the future may generate proof terms that try to avoid the refutation style (i.e., proof by contradiction).
+-p model : If the problem is satisfiable, indicate which formulas it considered are true, false or undetermined.
+-p modeltrue : If the problem is satisfiable, indicate which formulas it considered are true.
+
+If you are generating a Coq proof script, you may also want to send all the Coq output to a file.
+You can do this with the option
+-c mycoqfile.v
+
+-C : The problem is given as a Coq file instead of as a THF file.
+
+-G : A Coq file containing multiple conjectures is given. Try to prove each of them independently.
+
+Warning: Modes that call the first-order prover E will not produce proof output, so -p cannot be used with these modes.
+
