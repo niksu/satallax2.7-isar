@@ -1,4 +1,5 @@
 coq2/coqgtest1out.v
+bin/
 minisat/core/Solver.o
 minisat/simp/SimpSolver.o
 picosat-936/app.o
