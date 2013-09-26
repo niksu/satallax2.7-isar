@@ -14,3 +14,6 @@ src/coqparser/coqparser.mli
 src/parser/tptp_lexer.ml
 src/parser/tptp_parser.ml
 src/parser/tptp_parser.mli
+
+#This is modified by the configure script, and contains installation-specific data, so ignore when listing git status.
+src/config.ml
