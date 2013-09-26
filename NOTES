@@ -20,5 +20,9 @@ Notes:
    but "blast" takes ages. Replacing it with "auto" works fine.
 * Add comments making clear which rule used when this isn't obvious.
 * Sometimes Satallax's Coq output does some search (e.g., through use of "||"-branching). Currently this isn't automated in the Isar output -- instead the user needs to edit the script manually. (The script will include comments drawing the user's attention to this.)
+* Explain the mapping from Coq Ltac+lemma into Isar. It would also be preferable to have additional attributes to make the output more intelligible, and avoid hardcoding so much in Satallax.
+  - include use of "insert", in handling a couple of rules.
+  - lack of Isar level dynamic branching "patterns" -- need to use tactics for such behaviour.
+
 
 Ack: Chad Brown
