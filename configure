@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Optionally set picomus to your picomus executable
+picomus=${PWD}/picosat-936/picomus
+# Optionally set eprover to your E theorem prover executable
+#eprover=`which eprover`
+eprover=/home/nik/src/E1.8proto/E/PROVER/eprover
+
+# Make sure we find picomus (though Satallax will compile without)
+if [ -x "$picomus" ]
+then
+echo "Found picomus executable at $picomus"
+else
+echo "Cannot find picomus executable at $picomus; computation of proof terms will be disabled. (See INSTALL)"
+picomus=''
+fi
+
+# Make sure we find eprover (though Satallax will compile without)
+if [ -x "$eprover" ]
+then
+echo "Found eprover executable at $eprover"
+else
+echo "Cannot find eprover executable at $eprover"
+echo "You must give the path the the E prover executable via the command line as -E <eprover> to use modes that call E. (See INSTALL)"
+eprover=''
+fi
+
+# Build the config.ml file
+echo "(*** config.ml " > src/config.ml
+hostname | cat >> src/config.ml
+date | cat >> src/config.ml
+echo "***)" >> src/config.ml
+echo "let satallaxdir = \"${PWD}\"" >> src/config.ml
+echo "let picomus = ref \"$picomus\"" >> src/config.ml
+echo "let eprover = ref \"$eprover\"" >> src/config.ml
+

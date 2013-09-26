@@ -1,0 +1,16 @@
+coq2/coqgtest1out.v
+bin/*
+minisat/core/Solver.o
+minisat/simp/SimpSolver.o
+picosat-936/app.o
+picosat-936/main.o
+picosat-936/picomus.o
+picosat-936/picosat.o
+picosat-936/version.o
+picosat-936/libpicosat.a
+src/coqparser/coqlexer.ml
+src/coqparser/coqparser.ml
+src/coqparser/coqparser.mli
+src/parser/tptp_lexer.ml
+src/parser/tptp_parser.ml
+src/parser/tptp_parser.mli
