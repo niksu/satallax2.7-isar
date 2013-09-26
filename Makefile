@@ -24,13 +24,13 @@ bin/satallax.cmo : src/satallax.ml bin/satallaxmain.cmi  bin/satallaxmain.cmo bi
 bin/satallax.cmx : src/satallax.ml bin/satallaxmain.cmi bin/satallaxmain.cmx bin/coqparser.cmx bin/search.cmx bin/syntax.cmx bin/state.cmx bin/flags.cmx bin/coqparser.cmx
 	ocamlopt -I bin -o bin/satallax.cmx -c src/satallax.ml
 
-bin/satallaxmain.cmi : src/satallaxmain.mli bin/proofterm.cmi bin/search.cmi bin/syntax.cmi bin/state.cmi bin/flags.cmi bin/coqparser.cmi
+bin/satallaxmain.cmi : src/satallaxmain.mli bin/proofterm.cmi bin/search.cmi bin/syntax.cmi bin/state.cmi bin/flags.cmi bin/coqparser.cmi bin/flag.cmi
 	ocamlc $(OCAMLARGS) -I bin -o bin/satallaxmain.cmi -c src/satallaxmain.mli
 
-bin/satallaxmain.cmo : src/satallaxmain.ml bin/satallaxmain.cmi bin/proofterm.cmo bin/search.cmo bin/syntax.cmo bin/state.cmo bin/flags.cmo
+bin/satallaxmain.cmo : src/satallaxmain.ml bin/satallaxmain.cmi bin/proofterm.cmo bin/search.cmo bin/syntax.cmo bin/state.cmo bin/flags.cmo bin/flag.cmo
 	ocamlc $(OCAMLARGS) -I bin -o bin/satallaxmain.cmo -c src/satallaxmain.ml
 
-bin/satallaxmain.cmx : src/satallaxmain.ml bin/satallaxmain.cmi bin/proofterm.cmx bin/search.cmx bin/syntax.cmx bin/state.cmx bin/flags.cmx
+bin/satallaxmain.cmx : src/satallaxmain.ml bin/satallaxmain.cmi bin/proofterm.cmx bin/search.cmx bin/syntax.cmx bin/state.cmx bin/flags.cmx bin/flag.cmx
 	ocamlopt -I bin -o bin/satallaxmain.cmx -c src/satallaxmain.ml
 
 bin/satallaxcoqtac.cmx : src/satallaxcoqtac.ml bin/satallax.cmx

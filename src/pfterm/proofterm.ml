@@ -243,17 +243,17 @@ let print_coq_proofscript c r =
     end
   else
     begin
-      if result_coq then
+      if !result_coq then
         if size < maxcoqproofsize then
           ref_coq c prenorm_refutation
         else raise (CoqProofTooBig size)
-      else if result_isabellehol then
+      else if !result_isabellehol then
         if size < max_isabellehol_proofsize then
           ref_isabellehol c prenorm_refutation
         else raise (CoqProofTooBig size) (*FIXME replace with IsabelleHOLProofTooBig*)
     end;
   let coqTime= int_of_float ((Sys.time() -. beforeCoq) *. 1000.0) in
-  if (result_coq ) then if (!verbosity > 3) then Printf.printf  "Coq output done: time %d  \n" coqTime ;
+  if !result_coq then if (!verbosity > 3) then Printf.printf  "Coq output done: time %d  \n" coqTime ;
 	(*** Output Latex Search ***)
 
   if (result_latex && width < 50 && depth < 30) then
@@ -327,9 +327,9 @@ let print_coq_sproofterm c r =
 	(*** Output Coq ***)
 
   let beforeCoq= Sys.time() in
-  if (result_coq && size < maxcoqproofsize ) then ref_coq_spfterm c prenorm_refutation else raise (CoqProofTooBig size);
+  if (!result_coq && size < maxcoqproofsize ) then ref_coq_spfterm c prenorm_refutation else raise (CoqProofTooBig size);
   let coqTime= int_of_float ((Sys.time() -. beforeCoq) *. 1000.0) in
-  if (result_coq ) then if (!verbosity > 3) then Printf.printf  "Coq output done: time %d  \n" coqTime ;
+  if !result_coq then if (!verbosity > 3) then Printf.printf  "Coq output done: time %d  \n" coqTime ;
 	(*** Output Latex Search ***)
 
   if (result_latex && width < 50 && depth < 30) then

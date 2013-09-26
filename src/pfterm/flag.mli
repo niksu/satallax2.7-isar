@@ -16,7 +16,7 @@ val result_print_search : bool
 val result_print_translation : bool
 val result_latex : bool
 val result_statistic : bool
-val result_coq : bool
+val result_coq : bool ref
 val result_print_coq_type : bool
 val pftrm_semantic_imp : bool
 val pftrm_semantic_con : bool
@@ -30,5 +30,5 @@ val pftrm_eager_rewrite : bool
 
 val maxcoqproofsize : int
 
-val result_isabellehol : bool
+val result_isabellehol : bool ref
 val max_isabellehol_proofsize : int

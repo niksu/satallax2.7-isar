@@ -379,9 +379,8 @@ let process_command_line_args () =
 	    else if ((String.lowercase pfkind) = "isar") then
         begin
 	        mkproofterm := Some IsarScript;
-          (*FIXME need to make Flag module accessible from here*)
-          (* Flag.result_coq := false; *)
-          (* Flag.result_isabellehol := true *)
+          Flag.result_coq := false;
+          Flag.result_isabellehol := true
         end
 	    else
 	      raise (InputHelpError ("Unknown kind of proof " ^ pfkind ^ " for -p"))
