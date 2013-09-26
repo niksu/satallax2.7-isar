@@ -1,28 +1,70 @@
 Satallax 2.7-isar
+-----------------
 
-Fork of Satallax 2.7 with capability to produce Isar scripts for Satallax refutations.
+This is a fork of Satallax 2.7, with the added capability to produce
+Isar scripts from Satallax refutations.
+This is a rapid prototype, and hasn't been optimised for speed or
+beauty, but some care was taken to document the shortcomings, to
+facilitate future improvement.
 
-Bulding: follow Satallax instructions.
+License: unchanged from Satallax (GPL-style license).
 
-License: unchanged from Satallax (check requirements).
+Author: Nik Sultana.
 
-Notes:
-* Not all tab_ rules are currently handled.
-* Fix the bit which disables Coq proofs; need to be able to output either proofs, on user's command.
-* Hardcoded Isar code.
-* Duplication of Coq code.
-* Relying on Coq code for normalisation -- but this seems to be good enough. Perhaps should rename.
-* Testing is a bit inconvenient.
-* Sometimes blast isn't strong enough. For instance when run
-    ./bin/satallax -m mode188 -p isar /home/nik/TPTP-v5.5.0/Problems/SYO/SYO277^5.p
-   get this step
+Thanks: Chad Brown, main author of Satallax.
+
+How to buld:
+  1. Download Satallax.
+  2. Replace Satallax's src directory with the contents of this repo.
+  3. Build as normal in Satallax.
+
+Notes and limitations:
+* Only one Satallax rule isn't currently fully supported: tab_choice'.
+  There is a bug which shows up in places, e.g. when you run
+    satallax -m mode238 -p isar ~/TPTP-v5.5.0/Problems/SYO/SYO538^1.p
+* The Isar output will contain comments making clear which Satallax
+  rule are being simulated when this isn't obvious.
+    e.g.,
+      note H3 = TNAnd[rule_format, OF H2](*tab_nand*)
+* Testing is a bit inconvenient: currently you need to rerun Satallax
+  to refind the proof each time, and have it produce the Isar
+  proof. It would be preferable to save the proof found by Satallax
+  (in some internal format consistent with its Refutation type,
+  perhaps), and then produce target proofs (e.g., as Coq or Isar
+  scripts) from that.
+* There is a lot of hardcoded Isar snippets. This isn't ideal, but
+  unavoidable to some extent. (The same could be said for the Coq
+  output.)  Also, this increases the risk of bitrot.
+* The Isar-producing code follows the Coq-producing code to a large
+  extent, and I tried to reuse as much code as possible; but sometimes
+  some degree of duplication was unavoidable (either for necessity or
+  for convenience).
+* Following from the previous point, I'm relying on the
+  Coq-normalisation code for normalising terms before being used as
+  part of an Isar script.  So perhaps the Coq-normalisation code
+  should be renamed to reflect this more general use.
+* Sometimes Isabelle's "blast" tactic isn't strong enough to simulate
+  one of Satallax's inferences. For instance when I ran
+    ./bin/satallax -m mode188 -p isar ~/TPTP-v5.5.0/Problems/SYO/SYO277^5.p
+   and got this step
       from H1 obtain eigen__0 where H5 : "(~((! X1::i. ((! X2::(i=>o). ((X2 eigen__0) --> (X2 X1))) = (! X2::(i=>(i=>o)). ((! X3::i. ((X2 X3) X3)) --> ((X2 eigen__0) X1)))))))" by blast
-   but "blast" takes ages. Replacing it with "auto" works fine.
-* Add comments making clear which rule used when this isn't obvious.
-* Sometimes Satallax's Coq output does some search (e.g., through use of "||"-branching). Currently this isn't automated in the Isar output -- instead the user needs to edit the script manually. (The script will include comments drawing the user's attention to this.)
-* Explain the mapping from Coq Ltac+lemma into Isar. It would also be preferable to have additional attributes to make the output more intelligible, and avoid hardcoding so much in Satallax.
-  - include use of "insert", in handling a couple of rules.
-  - lack of Isar level dynamic branching "patterns" -- need to use tactics for such behaviour.
+   where "blast" took ages. Replacing it with "auto" worked fine.
+* Sometimes Satallax's Coq output does some search (e.g., through use
+  of "||"-branching).  Currently this isn't automated in the Isar
+  output -- instead the user needs to edit the scrip manually. (The
+  script will include comments drawing the user's attention to this.)
 
-
-Ack: Chad Brown
+TODO
+* Fix the bit which disables Coq proofs; need to be able to output
+  either kinds of proofs, based on the parameter switch.
+* Explain the mapping from Coq Ltac+lemma into Isar.
+  It would also be preferable to have additional attributes to make
+  the output more intelligible, and avoid hardcoding so much in
+  Satallax.
+  - describe why all definitions are unfolded at the start.
+  - describe the generous use of "insert", in handling a couple of rules.
+  - lack of Isar level dynamic branching "patterns" -- need to use
+    tactics for such behaviour.
+* Improve code, of course.
+  As well as good naming, it also needs consistent style -- most of
+  all when it comes to spacing.
