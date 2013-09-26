@@ -1,0 +1,10 @@
+; Dec 06 2012
+; Second mode using E
+USE_E
+true
+E_PERIOD
+100
+E_TIMEOUT
+2
+
+

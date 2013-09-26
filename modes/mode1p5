@@ -1,0 +1,45 @@
+; Initial Flag Settings
+; My guesses for reasonable values of the flags (except confrontation delays which were added later and left 0 here)
+; Dec 14 2009 / Jan 18 2011 (new proof term flag settings)
+; Chad E Brown
+EXISTS_DELAY
+1
+FORALL_DELAY
+1
+DEFAULTELT_DELAY
+30
+DEFAULTELTINST_DELAY
+30
+CONFR_DIFF_DELAY
+0
+CONFR_SAME1_DELAY
+0
+CONFR_SAME2_DELAY
+0
+ENUM_START
+2
+ENUM_ARROW
+10
+ENUM_O
+5
+ENUM_SORT
+2
+ENUM_NEG
+5
+ENUM_IMP
+20
+ENUM_FALSE
+20
+ENUM_CHOICE
+0
+ENUM_EQ
+5
+CHOICE_AS_DEFAULT
+false
+; Flags to control proof term creation -- only matters if -p is given.
+PFTRM_ADD_SYM_CLAUSES
+true
+PFTRM_PRESORT_CLAUSES
+false
+PFTRM_REMOVE_INDEPENDENT
+true

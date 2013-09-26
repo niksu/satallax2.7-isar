@@ -1,0 +1,18 @@
+; Chad E Brown, April 7, 2011
+; mode248 with some modifications targeting NUM802^5.
+; In the end, it's very close to the default values but with transitivity of equality
+; as a pattern clause.
+DYNAMIC_PATTERN_CLAUSES
+false
+PATTERN_CLAUSES_TRANSITIVITY_EQ
+true
+TREAT_CONJECTURE_AS_SPECIAL
+true
+ENABLE_PATTERN_CLAUSES
+true
+EXISTS_DELAY
+4
+FORALL_DELAY
+9
+IMITATE_DELAY
+4

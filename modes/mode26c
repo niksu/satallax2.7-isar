@@ -1,0 +1,41 @@
+; Modification of mode26 with *split-global-disjunctions* t, and *enable-pattern-clauses* instead of *enable-pattern-rules*, and with call-period 10
+; May 13 2010
+; Chad E Brown
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+ENABLE_PATTERN_CLAUSES
+true
+PATTERN_CLAUSES_DELAY
+1
+EXISTS_DELAY
+1
+FORALL_DELAY
+2
+DEFAULTELT_DELAY
+30
+DEFAULTELTINST_DELAY
+0
+CONFR_DIFF_DELAY
+0
+CONFR_SAME1_DELAY
+0
+CONFR_SAME2_DELAY
+0
+ENUM_START
+10
+ENUM_ARROW
+10
+ENUM_O
+5
+ENUM_SORT
+2
+ENUM_NEG
+0
+ENUM_IMP
+100
+ENUM_FALSE
+100
+ENUM_CHOICE
+100
+ENUM_EQ
+100

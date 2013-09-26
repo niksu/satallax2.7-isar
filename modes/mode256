@@ -1,0 +1,18 @@
+; Iterative Deepening setsub instantiations - starting with SetSubs using = over sort
+; May 11, 2011
+; Chad E. Brown
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+ENUM_ITER_DEEP
+true
+ENUM_ITER_DEEP_INIT
+2
+ENUM_EQ
+0
+ENUM_SORT
+0
+PROJECT_DELAY
+0
+IMITATE_DELAY
+0
+

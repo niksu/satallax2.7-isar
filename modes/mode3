@@ -1,0 +1,38 @@
+; Initial Flag Settings
+; I want flag settings that can prove the Mensa example at type oo.
+; (see problem MENSAOO)
+; Dec 14 2009
+; Chad E Brown
+; MENSAOO: 2s
+EXISTS_DELAY
+0
+FORALL_DELAY
+1
+DEFAULTELT_DELAY
+0
+DEFAULTELTINST_DELAY
+0
+CONFR_DIFF_DELAY
+100
+CONFR_SAME1_DELAY
+100
+CONFR_SAME2_DELAY
+0
+ENUM_START
+30
+ENUM_ARROW
+10
+ENUM_O
+5
+ENUM_SORT
+10
+ENUM_NEG
+5
+ENUM_IMP
+20
+ENUM_FALSE
+20
+ENUM_CHOICE
+2
+ENUM_EQ
+5

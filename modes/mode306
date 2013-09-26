@@ -1,0 +1,8 @@
+; Dec 06 2012
+; Third mode using E
+USE_E
+true
+E_PERIOD
+1000
+E_TIMEOUT
+3

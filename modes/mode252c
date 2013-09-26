@@ -1,0 +1,37 @@
+; Chad E Brown
+; March 24, 2012
+; mode193b and mode252b combo to get a good proof of {F x} = {F z | z :e {x}}
+; and see exactly which flags need to be set for it.
+; SPLIT_GLOBAL_DISJUNCTIONS true doesn't help much -- the split into subgoals would only happen after applying set extensionality which happens during search
+; It does help even though it doesn't split into more than one subgoal. I assume it just rearranges the search space a bit because it does the first few steps
+; before search.
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+PRIORITY_QUEUE_IMPL
+1
+ENABLE_PATTERN_CLAUSES
+true
+PATTERN_CLAUSES_ONLYALLSTRICT
+true
+PATTERN_CLAUSES_DELAY
+1
+EXISTS_DELAY
+0
+FORALL_DELAY
+1
+CONFR_DIFF_DELAY
+100
+CONFR_SAME1_DELAY
+10
+CONFR_SAME2_DELAY
+0
+IMITATE_DELAY
+2
+INITIAL_SUBTERMS_AS_INSTANTIATIONS
+true
+POST_OR_L_DELAY
+2
+POST_OR_R_DELAY
+2
+POST_MATING_DELAY
+2

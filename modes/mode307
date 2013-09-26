@@ -1,0 +1,6 @@
+; Dec 07 2012
+; More testing E : Flag E_EQO_EQUIV to treat equivalences as FO
+E_EQO_EQUIV
+true
+
+

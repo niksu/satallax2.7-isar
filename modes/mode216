@@ -1,0 +1,46 @@
+; Modification of mode13a with ENUM_IMP 0 and other ENUM_ values changed
+; Targeting existence of a function g : ooo that shows o is at least half as big as oo.
+; Feb 3 2011
+; Chad E Brown
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+EXISTS_DELAY
+2
+FORALL_DELAY
+2
+DEFAULTELT_DELAY
+50
+DEFAULTELTINST_DELAY
+0
+CONFR_DIFF_DELAY
+100
+CONFR_SAME1_DELAY
+100
+CONFR_SAME2_DELAY
+0
+PROJECT_DELAY
+0
+ENUM_START
+0
+ENUM_ARROW
+10
+ENUM_O
+50
+ENUM_SORT
+20
+ENUM_NEG
+25
+ENUM_IMP
+1
+ENUM_FALSE
+20
+ENUM_CHOICE
+10
+ENUM_EQ
+20
+IMITATE_DEFNS
+false
+IMITATE_DELAY
+6
+LEIBEQ_TO_PRIMEQ
+true

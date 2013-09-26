@@ -1,0 +1,9 @@
+; Dec 05 2012
+; First mode using E
+USE_E
+true
+E_PERIOD
+10
+E_TIMEOUT
+1
+

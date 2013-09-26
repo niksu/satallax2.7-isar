@@ -1,0 +1,62 @@
+; Modification of mode13 that has
+; *instantiate-with-func-diseqn-sides* nil
+; and some other modifications from Dec 29 2009.
+; Dec 26 2009, modified Dec 29 2009
+; Chad E Brown
+; The problem motivating this mode is ALG290^5.
+; Upon close examination, it seems to need to only do 1 trivial 1st order instantiation (with a const coming from an exists)
+; and hardly any propositional reasoning.  For this reason I'm delaying everything after an and/nand, and delaying most foralls.
+; This mode can now prove ALG290^5 in about a second. - Chad, Dec 29 2009
+EXISTS_DELAY
+0
+; modified from 1 Dec 29 2009
+FORALL_DELAY
+3
+; added Dec 29 2009
+POST_OR_L_DELAY
+5
+; added Dec 29 2009
+POST_OR_R_DELAY
+5
+; added Dec 29 2009
+POST_NOR_L_DELAY
+5
+; added Dec 29 2009
+POST_NOR_R_DELAY
+5
+DEFAULTELT_DELAY
+0
+DEFAULTELTINST_DELAY
+0
+CONFR_DIFF_DELAY
+100
+CONFR_SAME1_DELAY
+100
+CONFR_SAME2_DELAY
+0
+ENUM_START
+30
+ENUM_ARROW
+10
+ENUM_O
+5
+ENUM_SORT
+0
+ENUM_NEG
+5
+ENUM_IMP
+20
+ENUM_FALSE
+20
+ENUM_CHOICE
+10
+ENUM_EQ
+0
+IMITATE_DEFNS
+false
+IMITATE_DELAY
+6
+LEIBEQ_TO_PRIMEQ
+true
+INSTANTIATE_WITH_FUNC_DISEQN_SIDES
+false

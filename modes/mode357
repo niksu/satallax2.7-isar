@@ -1,0 +1,39 @@
+; Dec 18 2012 - Started with mode331 (Combo of mode257 mode306 mode307)
+; and modified so that it suggests many FO-like setsubs early in the search.
+; It uses E to try to prove one of the setsubs leads to a solution.
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+ENUM_ITER_DEEP
+true
+ENUM_ITER_DEEP_INIT
+7
+ENUM_CHOICE
+20
+ENUM_SORT
+0
+ENUM_O
+20
+ENUM_ARROW
+20
+ENUM_FALSE
+20
+ENUM_NEG
+0
+ENUM_IMP
+2
+ENUM_FORALL
+20
+ENUM_EQ
+0
+PROJECT_DELAY
+0
+IMITATE_DELAY
+0
+USE_E
+true
+E_PERIOD
+1000
+E_TIMEOUT
+3
+E_EQO_EQUIV
+true

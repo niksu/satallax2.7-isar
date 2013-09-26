@@ -1,0 +1,22 @@
+; Chad E Brown
+; March 24, 2012
+; mode193 modified to get a good proof of {F z | z :e {x}} c= {F x}
+; and see exactly which flags need to be set for it.
+PRIORITY_QUEUE_IMPL
+1
+ENABLE_PATTERN_CLAUSES
+true
+PATTERN_CLAUSES_DELAY
+1
+EXISTS_DELAY
+0
+FORALL_DELAY
+1
+CONFR_DIFF_DELAY
+100
+CONFR_SAME1_DELAY
+10
+CONFR_SAME2_DELAY
+0
+INSTANTIATE_WITH_FUNC_DISEQN_SIDES
+false

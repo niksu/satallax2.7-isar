@@ -1,0 +1,19 @@
+; Iterative Deepening setsub instantiations - starting with SetSubs constant false
+; May 11, 2011
+; Chad E. Brown
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+ENUM_ITER_DEEP
+true
+ENUM_ITER_DEEP_INIT
+1
+ENUM_CHOICE
+20
+ENUM_SORT
+20
+ENUM_FALSE
+0
+ENUM_NEG
+0
+
+

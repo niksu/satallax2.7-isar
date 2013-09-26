@@ -1,0 +1,53 @@
+#!/bin/bash
+bin/satallax.opt problems/ORIMP.p
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt problems/PEIRCE1.p
+if [ $? != 25 ]; then
+echo ERROR
+fi
+bin/satallax.opt -c - -p coqscript -m mode1 problems/CHOICE4.p
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt -p hocore -m mode1 problems/CHOICE20.p
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt -t 5 problems/ETADN.p
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt problems/REFL1.p
+if [ $? != 25 ]; then
+echo ERROR
+fi
+bin/satallax.opt -v problems/TEUCKE1.p
+if [ $? != 25 ]; then
+echo ERROR
+fi
+bin/satallax.opt -c - -p coqscript -m mode1 problems/KAM2.p
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt problems/CHOICE5.p
+if [ $? != 15 ]; then
+echo ERROR
+fi
+bin/satallax.opt -p coqscript -C coq2/coqltest1.v
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt -p coqspfterm -C coq2/coqltest1.v
+if [ $? != 20 ]; then
+echo ERROR
+fi
+bin/satallax.opt -c coq2/coqgtest1out.v -G coq2/coqgtest1.v
+if [ $? != 0 ]; then
+echo ERROR
+fi
+bin/satallax.opt -N -m satmode2a problems/CHOICE5.p
+if [ $? != 15 ]; then
+echo ERROR
+fi

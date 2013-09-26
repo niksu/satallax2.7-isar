@@ -1,0 +1,11 @@
+; Chad E Brown
+; Jan 27 2012
+; Default flag settings with minor modifications
+INSTANTIATE_WITH_FUNC_DISEQN_SIDES
+false
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+LEIBEQ_TO_PRIMEQ
+true
+PREPROCESS_BEFORE_SPLIT
+true

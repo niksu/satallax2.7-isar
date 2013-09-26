@@ -1,0 +1,22 @@
+; mode257 with ALL_DEFS_AS_EQNS true - Feb 27 2012
+; Iterative Deepening setsub instantiations - starting with SetSubs constant false
+; May 11, 2011
+; Chad E. Brown
+SPLIT_GLOBAL_DISJUNCTIONS
+true
+ENUM_ITER_DEEP
+true
+ENUM_ITER_DEEP_INIT
+1
+ENUM_CHOICE
+20
+ENUM_SORT
+20
+ENUM_FALSE
+0
+ENUM_NEG
+0
+
+
+ALL_DEFS_AS_EQNS
+true

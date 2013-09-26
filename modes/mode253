@@ -1,0 +1,13 @@
+; Defaults for everything except ENUM_ITER-DEEP true
+; and encouraging primsubs using implication
+; targetting SYO/SYO032^1.p, but would like to get more
+; May 10, 2011
+; Chad E Brown
+ENUM_ITER_DEEP
+true
+ENUM_ITER_DEEP_INIT
+3
+PROJECT_DELAY
+0
+ENUM_IMP
+0
