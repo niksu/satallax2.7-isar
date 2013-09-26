@@ -20,23 +20,6 @@ let rec print_stp_coq c m h p =
 	print_stp_coq c b h false;
 	if p then Printf.fprintf c ")"
       end
-(* FIXME moved to Syntax
-let rec print_stp_isar c m h p =
-  match m with
-    | Base x ->
-	      let x = try (Hashtbl.find h x) with Not_found -> failwith("print_stp_isar can't find coqname of "^x) in
-          Printf.fprintf c "%s" x
-    | Prop ->
-        Printf.fprintf c "o"
-    | Ar(a,b) ->
-        begin
-	        if p then Printf.fprintf c "(";
-	        print_stp_isar c a h true;
-	        Printf.fprintf c " => ";
-	        print_stp_isar c b h false;
-	        if p then Printf.fprintf c ")"
-        end
-*)
 
 (** Input: out_channel c, term m, list of bound variables 
 	Invariant: m is closed, if  it is enclosed in quantifiers for the bound variables 
@@ -604,12 +587,12 @@ let trm_to_isar_rembvar x c m bound =
         trm_to_isar c m bound
 
 
+(*c is channel,
+  hyp is shared hypotheses,
+  h1 is new hypothesis' name,
+  s and t are the new hypothesis terms,
+  r1 and r2 are the remainder refutations*)
 let rec ref_isabellehol1 c r hyp const sp=
-  (*c is channel,
-    hyp is shared hypotheses,
-    h1 is new hypothesis' name,
-    s and t are the new hypothesis terms,
-    r1 and r2 are the remainder refutations*)
   let sp' = sp ^ "  " in
   let sp'' = sp' ^ "  " in
   let tab_disj c hyp h1 s t r1 r2 =
@@ -662,11 +645,11 @@ let rec ref_isabellehol1 c r hyp const sp=
 	      Printf.fprintf c "%sthus ?thesis by blast\n" sp
     | Implication(h,s,t,r1,r2) ->
 	      let h1 = get_hyp_name() in
-(*
+          (*
 	        Printf.fprintf c "%stab_imp %s %s.\n" sp (lookup "4" (coqnorm h) hyp) h1;
 	        ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
 	        ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
-*)
+          *)
 	        Printf.fprintf c "%snote %s = %s[THEN TImp[THEN mp]](*tab_imp*)\n" sp h1 (lookup "4" (coqnorm h) hyp);
           tab_disj c hyp h1 s t r1 r2
     | Disjunction(h,s,t,r1,r2) ->
@@ -710,12 +693,13 @@ let rec ref_isabellehol1 c r hyp const sp=
     | All(h,s,r1,a,m,n) ->
 	      let const = add_fresh_const true c const n sp in
 	      let h1 = get_hyp_name() in
-(*
+          (*
 	        Printf.fprintf c "%stab_all %s (" sp (lookup "10" (coqnorm h) hyp);
 	        (trm_to_coq c n (Variables.make ()) (-1) (-1));
 	        Printf.fprintf c ") %s.\n" h1;
-*)
-(* note H17 = H16[THEN spec, of "eigen__0 (eigen__2 eigen__5 eigen__6)"] *)
+          *)
+          (*Translated inference should look something like this:
+            note H17 = H16[THEN spec, of "eigen__0 (eigen__2 eigen__5 eigen__6)"] *)
 	        Printf.fprintf c "%snote %s = %s[THEN spec, of \"" sp h1 (lookup "10" (coqnorm h) hyp);
 	        trm_to_isar c n (Variables.make ());
 	        Printf.fprintf c "\"]\n";
@@ -735,7 +719,8 @@ let rec ref_isabellehol1 c r hyp const sp=
 	        (* Printf.fprintf c "%stab_ex %s %s %s.\n" sp (lookup "12" (coqnorm h) hyp) x h1; *)
 	        (* ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) ((x,a)::const) sp *)
 
-    (* from H4 obtain eigen__1 where H5 : "rel_d eigen__0 eigen__1" by (erule TEx)   *)
+          (*Translated inferences should look something like this:
+            from H4 obtain eigen__1 where H5 : "rel_d eigen__0 eigen__1" by (erule TEx)   *)
 
 	        Printf.fprintf c "%sfrom %s obtain eigen%s where %s : \"" sp (lookup "12" (coqnorm h) hyp) x h1;
 	        trm_to_isar c (coqnorm s) (Variables.make ());
@@ -771,7 +756,7 @@ let rec ref_isabellehol1 c r hyp const sp=
         let (neg_hyp, pos_hyp) =
           if neg_p h1 then (h1, h2) else (h2, h1) in
 
-    (*FIXME mostly duplicated from tab_dec*)
+    (*NOTE mostly duplicated from tab_dec*)
         let card = List.length ss in
         let proof_step_str =
           if card > 1 then
@@ -866,21 +851,12 @@ let rec ref_isabellehol1 c r hyp const sp=
 	          Printf.fprintf c "%s" (side "t");
         in
 
-      (* have custom_tac : "\<And> s1 t1. eigen__1 s1 \<noteq> eigen__1 t1 ==> s1 \<noteq> t1" by blast *)
-      (* note H22 = custom_tac[OF H20] *)
-      (* from H22 have False *)
-
 	        Printf.fprintf c "%s%s" sp custom_dec_prefix;
           print_diseq ();
 	        Printf.fprintf c "%s\n" custom_dec_suffix;
 	        Printf.fprintf c "%snote %s = %s[OF %s]\n" sp h3 fresh_fact_name (lookup "16" (coqnorm h1) hyp);
 	        Printf.fprintf c "%sfrom %s have False\n" sp h3;
           Printf.fprintf c "%s%s\n" sp' proof_step_str;
-
-	        (* List.iter *)
-          (*   (fun (s, r) -> *)
-          (*      ref_isabellehol1 c r ((coqnorm s,h3)::hyp) const (sp^" ")) *)
-          (*   (List.combine ss rs) *)
 
 	        ignore(List.fold_right
             (fun (s, r) remaining ->
@@ -1004,7 +980,7 @@ let rec ref_isabellehol1 c r hyp const sp=
           begin
             match eps with
               | Choice(a) ->
-(*
+                  (*
 	                Printf.fprintf c "%stab_choice " sp;
 	                print_stp_coq c a coq_names true;
 	                Printf.fprintf c " (";
@@ -1012,12 +988,12 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                Printf.fprintf c ") %s.\n" h1;
 	                ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
 	                ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
-*)
+                  *)
 
-(*
-    let ?p = "% (X1 :: i). f X1 = eigen__11"
-    have H4 : "(! x. ~ ?p x)" by (rule TSeps[where 'A = "i" and p = ?p, THEN mp], rule impI, insert H2, blast)
-*)
+                  (*Translated inferences should look something like this:
+                    let ?p = "% (X1 :: i). f X1 = eigen__11"
+                    have H4 : "(! x. ~ ?p x)" by (rule TSeps[where 'A = "i" and p = ?p, THEN mp], rule impI, insert H2, blast)
+                  *)
                   let termname = "?" ^ get_fresh_name ()
                   in
 	                  Printf.fprintf c "%slet %s = \"" sp termname;
@@ -1028,8 +1004,7 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                  print_stp_isar c a true;
                     Printf.fprintf c "\" and p = %s, THEN mp], rule impI, insert %s, blast)\n" termname (String.concat " " (List.map snd hyp));
 	                  ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp ^ " ");
-              | Name(x,Ar(Ar(a,Prop),_)) -> (*FIXME this rule is broken, e.g., try reconstructing proof from
-                                            runnin ./bin/satallax -m mode238 -p isar /home/nik/TPTP-v5.5.0/Problems/SYO/SYO538^1.p*)
+              | Name(x,Ar(Ar(a,Prop),_)) ->
                   (*
 	                Printf.fprintf c "%stab_choice' " sp;
 	                print_stp_coq c a coq_names true;
@@ -1040,7 +1015,10 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                Printf.fprintf c ") %s %s.\n" (get_Choicop_axiom x a hyp) h1;
                   *)
 
-                  (*FIXME this is largely adapted from the handler of tab_choice*)
+                  (*FIXME this rule is broken, e.g., try reconstructing proof from
+                    running ./bin/satallax -m mode238 -p isar /home/nik/TPTP-v5.5.0/Problems/SYO/SYO538^1.p*)
+
+                  (*NOTE this is largely adapted from the handler of tab_choice*)
                   let termname = "?" ^ get_fresh_name ()
                   in
 	                  Printf.fprintf c "%slet %s = \"" sp termname;
@@ -1054,19 +1032,7 @@ let rec ref_isabellehol1 c r hyp const sp=
                     Printf.fprintf c "\", THEN spec, of \"";
 	                  trm_to_isar c eps (Variables.make ());
                     Printf.fprintf c "\", THEN spec, of \"%s\", THEN mp, OF %s, THEN mp], rule impI, insert %s, simp)\n" termname (get_Choicop_axiom x a hyp) (String.concat " " (List.map snd hyp));
-(* thm TSeps'[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp] *)
-(* thm TSeps''[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp] *)
-(* thm TSeps'''[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp] *)
-(*
-have H4 : "! x. ~ ?plop x"
-  apply (rule TSeps'''[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp, OF choiceax, THEN mp])
-  apply (rule impI)
-  apply (insert H0 H1 H2 H3)
-  apply simp
 
-        (* tab_choice' i (eps) (fun (X1:i) => (~ False -> (~ X1 = __0)) -> (~ (False -> (~ X1 = __1)))) choiceax H4. *)
-
-*)
                     (*FIXME DRY principle -- this is adapted from above. The only change is "TSeps'" to "TSeps''"*)
 	                  Printf.fprintf c "\n";
 	                  Printf.fprintf c "by (rule TSeps''[where 'A = \"";
@@ -1147,7 +1113,8 @@ have H4 : "! x. ~ ?plop x"
                   (* Printf.fprintf c "%stab_rew_ex %s %s (" sp h1 h2; *)
 				          (* (trm_to_coq c prefix (Variables.make ()) (-1) (-1));  Printf.fprintf c ") .\n"; *)
 
-(* note H2 = eq_ind[THEN spec, of "% p. ? x. p x", THEN spec, of "% (X1::(bool=>bool)=>bool). ~ X1 (% X2::bool. X2)", THEN mp, OF H0, THEN spec, of "% p. ~ (! x. ~ p x)", THEN mp, OF eq_exists_nforall] *)
+                  (*Translated inferences should look something like this:
+                    note H2 = eq_ind[THEN spec, of "% p. ? x. p x", THEN spec, of "% (X1::(bool=>bool)=>bool). ~ X1 (% X2::bool. X2)", THEN mp, OF H0, THEN spec, of "% p. ~ (! x. ~ p x)", THEN mp, OF eq_exists_nforall] *)
 
                   (*FIXME horrible hardcoding*)
                     Printf.fprintf c "%snote %s = eq_ind[THEN spec, of \"%% p. ? x. p x\", THEN spec, of \"" sp h2;
@@ -1253,23 +1220,19 @@ have H4 : "! x. ~ ?plop x"
     | _ -> failwith("unknown refutation case in ref_coq" )
 
 let ref_isabellehol c r =
-(*FIXME where is the header + signature + lemma definition printed?*)  
 	(* get conjecture *)
 	let con =
     match !conjecture with
-        Some(_, con, _) -> (* coqnorm *) con (*FIXME rename coqnorm?*)  
+        Some(_, con, _) -> con
       | None -> False in
 	(* initialise hypotheses *)
 	let hyp =
     List.fold_left
       (fun l (s, pt) ->
-         (coqnorm pt, s) :: l ) [] !coqsig_hyp_trm in (*FIXME coqnorm?, coqsig_hyp_trm?*)  
+         (coqnorm pt, s) :: l ) [] !coqsig_hyp_trm in
 	let h1 = get_hyp_name() in
   Printf.fprintf c "\nproof (rule ccontr)\n";
   Printf.fprintf c "  assume %s : \"" h1;
-(* (List.assoc h1 !coqsig_hyp) *)
-(*to_trm name_trm [] (neg con) None*)
-  (* print_pretrm_isar c precon coq_names coq_used_names (-1) (-1); *)
 
   trm_to_isar c (coqnorm (neg con)) (Variables.make ());
 
@@ -1277,8 +1240,7 @@ let ref_isabellehol c r =
   Printf.fprintf c "  show False\n";
   Printf.fprintf c "    proof (rule ccontr)\n";
 
-  ref_isabellehol1 c r ((neg (coqnorm con), h1) :: hyp) (!coqsig_const) "    ";  (*FIXME what are the parameters?*)
-  (* Printf.fprintf c "  thus False .\n"; *)
+  ref_isabellehol1 c r ((neg (coqnorm con), h1) :: hyp) (!coqsig_const) "    ";
   Printf.fprintf c "    qed\n";
   Printf.fprintf c "  qed\n";
   Printf.fprintf c "end\n"
@@ -1300,25 +1262,6 @@ let rec print_stp_tstp c m p =
 	if p then Printf.fprintf c ")";
 	flush c
       end
-
-(*
-(*FIXME duplicated from TSTP function*) (*FIXME there's another function, with a slightly different signature, in Syntax*)
-let rec print_stp_isar c m p =
-  match m with
-    | Base x ->
-        Printf.fprintf c "%s" x
-    | Prop ->
-        Printf.fprintf c "o"
-    | Ar(a,b) ->
-        begin
-	        if p then Printf.fprintf c "(";
-	        print_stp_tstp c a true;
-	        Printf.fprintf c "=>";
-	        print_stp_tstp c b false;
-	        if p then Printf.fprintf c ")";
-	        flush c
-        end
-*)
 
 (** Input: out_channel c, term m, list of bound variables 
 	Invariant: m is closed, if  it is enclosed in quantifiers for the bound variables 
