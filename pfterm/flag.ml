@@ -31,7 +31,7 @@ let result_latex = false
 let result_statistic = false
 
 (** Print the Coq proof script**)
-let result_coq = false (*FIXME was: true *)
+let result_coq = true
 
 (** If a term with a "fun x", "forall x" or "exists x" is printed, the type is added: e.g. "fun (x:tpof(x))" **)
 let result_print_coq_type = true
@@ -65,5 +65,5 @@ let maxcoqproofsize = 800
 
 
 (** Isabelle/HOL-related flats **)
-let result_isabellehol = true
+let result_isabellehol = false
 let max_isabellehol_proofsize = 800

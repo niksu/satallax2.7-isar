@@ -1024,7 +1024,7 @@ let print_coqsig c =
   in
   let rec print_coqsig_hyp l =
     match l with
-        ((x,m)::r) ->
+        ((x, t)::r) ->
 	        begin
 	          try
               if !mkproofterm = Some IsarScript then
@@ -1032,19 +1032,20 @@ let print_coqsig c =
 	                print_coqsig_hyp r;
 	                Printf.fprintf c "assumes %s : \"" x;
 	                (* print_pretrm_isar c m coq_names coq_used_names (-1) (-1); *)
-                  trm_to_isar c (coqnorm m) (Syntax.Variables.make ());
+                  trm_to_isar c (coqnorm t) (Syntax.Variables.make ());
 	                Printf.fprintf c "\"\n"
                 end
+              else if !mkproofterm = Some CoqScript then
+                (*have Syntax.trm but need Syntax.pretrm, so look it up*)
+                let pt = List.assoc x !coqsig_hyp in
+	                begin
+	                  print_coqsig_hyp r;
+	                  Printf.fprintf c "Hypothesis %s : " x;
+	                  if (!coq2) then print_pretrm_coq2 c pt (-1) (-1) else print_pretrm_coq c pt coq_names coq_used_names (-1) (-1);
+	                  Printf.fprintf c ".\n"
+                  end
               else
-                failwith "Printing of hypotheses might need modification for Coq."
-(*
-	              begin
-	                print_coqsig_hyp r;
-	                Printf.fprintf c "Hypothesis %s : " x;
-	                if (!coq2) then print_pretrm_coq2 c m (-1) (-1) else print_pretrm_coq c m coq_names coq_used_names (-1) (-1);
-	                Printf.fprintf c ".\n"
-                end
-*)
+                failwith "Printing of hypotheses: Unrecognised proof-output format."
 	          with
 	            | Not_found ->
 	                begin
