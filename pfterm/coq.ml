@@ -1028,7 +1028,9 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                  print_stp_isar c a true;
                     Printf.fprintf c "\" and p = %s, THEN mp], rule impI, insert %s, blast)\n" termname (String.concat " " (List.map snd hyp));
 	                  ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp ^ " ");
-              | Name(x,Ar(Ar(a,Prop),_)) -> (*TODO*) 
+              | Name(x,Ar(Ar(a,Prop),_)) -> (*FIXME this rule is broken, e.g., try reconstructing proof from
+                                            runnin ./bin/satallax -m mode238 -p isar /home/nik/TPTP-v5.5.0/Problems/SYO/SYO538^1.p*)
+                  (*
 	                Printf.fprintf c "%stab_choice' " sp;
 	                print_stp_coq c a coq_names true;
 	                Printf.fprintf c " (";
@@ -1036,8 +1038,53 @@ let rec ref_isabellehol1 c r hyp const sp=
 	                Printf.fprintf c ") (";
 	                (trm_to_coq c pred (Variables.make ()) (-1) (-1));
 	                Printf.fprintf c ") %s %s.\n" (get_Choicop_axiom x a hyp) h1;
-	                ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
-	                ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
+                  *)
+
+                  (*FIXME this is largely adapted from the handler of tab_choice*)
+                  let termname = "?" ^ get_fresh_name ()
+                  in
+	                  Printf.fprintf c "%slet %s = \"" sp termname;
+	                  trm_to_isar c pred (Variables.make ());
+	                  Printf.fprintf c "\"\n";
+	                  Printf.fprintf c "%shave %s : \"! x. ~ %s x\" " sp h1 termname;
+
+	                  Printf.fprintf c "\n(*FIXME only one from the next three should be used --- comment out the others.*)\n";
+	                  Printf.fprintf c "by (rule TSeps'[where 'A = \"";
+	                  print_stp_isar c a true;
+                    Printf.fprintf c "\", THEN spec, of \"";
+	                  trm_to_isar c eps (Variables.make ());
+                    Printf.fprintf c "\", THEN spec, of \"%s\", THEN mp, OF %s, THEN mp], rule impI, insert %s, simp)\n" termname (get_Choicop_axiom x a hyp) (String.concat " " (List.map snd hyp));
+(* thm TSeps'[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp] *)
+(* thm TSeps''[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp] *)
+(* thm TSeps'''[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp] *)
+(*
+have H4 : "! x. ~ ?plop x"
+  apply (rule TSeps'''[where 'A = "i", THEN spec, of "eps", THEN spec, of "?plop", THEN mp, OF choiceax, THEN mp])
+  apply (rule impI)
+  apply (insert H0 H1 H2 H3)
+  apply simp
+
+        (* tab_choice' i (eps) (fun (X1:i) => (~ False -> (~ X1 = __0)) -> (~ (False -> (~ X1 = __1)))) choiceax H4. *)
+
+*)
+                    (*FIXME DRY principle -- this is adapted from above. The only change is "TSeps'" to "TSeps''"*)
+	                  Printf.fprintf c "\n";
+	                  Printf.fprintf c "by (rule TSeps''[where 'A = \"";
+	                  print_stp_isar c a true;
+                    Printf.fprintf c "\", THEN spec, of \"";
+	                  trm_to_isar c eps (Variables.make ());
+                    Printf.fprintf c "\", THEN spec, of \"%s\", THEN mp, OF %s, THEN mp], rule impI, insert %s, simp)\n" termname (get_Choicop_axiom x a hyp) (String.concat " " (List.map snd hyp));
+
+                    (*FIXME DRY principle -- this is adapted from above. The only change is "TSeps'" to "TSeps'''"*)
+	                  Printf.fprintf c "\n";
+	                  Printf.fprintf c "by (rule TSeps'''[where 'A = \"";
+	                  print_stp_isar c a true;
+                    Printf.fprintf c "\", THEN spec, of \"";
+	                  trm_to_isar c eps (Variables.make ());
+                    Printf.fprintf c "\", THEN spec, of \"%s\", THEN mp, OF %s, THEN mp], rule impI, insert %s, simp)\n" termname (get_Choicop_axiom x a hyp) (String.concat " " (List.map snd hyp));
+
+	                  ref_isabellehol1 c r1 ((coqnorm s,h1)::hyp) const (sp^" ");
+	                  ref_isabellehol1 c r2 ((coqnorm t,h1)::hyp) const (sp^" ");
               | _ -> failwith "eps is not a valid epsilon"
           end
     | Cut(s,r1,r2) ->
