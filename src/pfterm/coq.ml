@@ -1661,9 +1661,9 @@ let ref_tstp c r =
     (!coqsig_hyp_trm);
   match !conjecture with
   | Some(_,con,_) ->
-    let ccon = coqnorm con in
-    let ncon = neg ccon in
-    let h1 = get_thyp_name() in
+    let ccon = coqnorm con in (*conjecture*)
+    let ncon = neg ccon in (*negated conjecture*)
+    let h1 = get_thyp_name() in (*hypothesis name*)
     Printf.fprintf c "thf(%s,conjecture," (!conjecturename);
     flush c;
     trm_to_tstp c ccon (Variables.make ());
@@ -1679,7 +1679,7 @@ let ref_tstp c r =
     let ll = ref_tstp1 c r [(ncon,h1)] (!coqsig_const) in
     Printf.fprintf c "thf(0,theorem,";
     flush c;
-    trm_to_tstp c ccon (Variables.make ());
+    trm_to_tstp c ccon (Variables.make ()); (*print the conjecture again*)
     flush c;
     Printf.fprintf c ",inference(contra,[status(thm),contra(discharge,[%s])],[%d,%s])).\n" h1 ll h1;
     flush c;
