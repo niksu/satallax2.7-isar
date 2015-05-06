@@ -3,8 +3,7 @@
 # Optionally set picomus to your picomus executable
 picomus=${PWD}/picosat-936/picomus
 # Optionally set eprover to your E theorem prover executable
-#eprover=`which eprover`
-eprover=/home/nik/src/E1.8proto/E/PROVER/eprover
+eprover=`which eprover`
 
 # Make sure we find picomus (though Satallax will compile without)
 if [ -x "$picomus" ]
