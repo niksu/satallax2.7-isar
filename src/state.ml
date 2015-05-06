@@ -1427,4 +1427,121 @@ let print_num_axioms () =
   let n = List.length (!initial_branch) in
   Printf.printf "(NUMAXIOMS \"%s\" %d)\n" (!problemfile) n;
   exit 123
-  
+
+
+(** Extraction of constants and types from different kinds of types. **)
+
+(*List the constants that occur in a rule-info, as name-type pairs.
+  NOTE the resulting list doesn't contain duplicate constants.*)
+let rec consts_of_ruleinfo acc : ruleinfo -> ctx = function
+    NegPropRule t
+  | PosPropRule t
+  | FreshRule (_, t, _) -> consts_of_trm acc t
+  | InstRule (_, t1, t2)
+  | ChoiceRule (t1, t2) ->
+    let acc' = consts_of_trm acc t1
+    in consts_of_trm acc' t2
+  | ConfrontationRule (_, _)
+  | MatingRule (_, _)
+  | Known (_, _, _) -> acc
+
+(*List the constants that occur in a refutation, as name-type pairs.
+  NOTE the resulting list doesn't contain duplicate constants.*)
+let rec consts_of_refut acc : refut -> ctx = function
+    NegImpR (t1, t2, r)
+  | EqFR (_, _, t1, t2, r)
+  | NegEqFR (_, _, t1, t2, r) ->
+    let acc' = consts_of_trm acc t1 in
+    let acc'' = consts_of_trm acc' t2 in
+    consts_of_refut acc'' r
+  | NegAllR (stp, t, name, r) ->
+    let acc' =
+      begin
+        print_endline name;
+      try
+        let stp' = List.assoc name acc
+        in
+          if stp' <> stp then failwith "Different types for same constant?"
+          else acc
+      with Not_found ->
+        (name, stp) :: acc
+      end in
+    let acc'' = consts_of_trm acc' t in
+    consts_of_refut acc'' r
+  | EqOR (t1, t2, r1, r2)
+  | NegEqOR (t1, t2, r1, r2)
+  | ImpR (t1, t2, r1, r2) ->
+    let acc' = consts_of_trm acc t1 in
+    let acc'' = consts_of_trm acc' t2 in
+    let acc''' = consts_of_refut acc'' r1 in
+    consts_of_refut acc''' r2
+  | FalseR
+  | NegReflR
+  | AssumptionConflictR -> acc
+  | SearchR (cl, cr) ->
+    List.fold_right (fun c acc ->
+      let acc' =
+        List.fold_right (fun z acc ->
+          consts_of_trm acc (Hashtbl.find atom_hash_rev (abs z)))
+          c acc in
+      try
+        consts_of_ruleinfo acc' (cr c)
+      with Not_found -> acc') cl acc
+
+(*List the base types that are referenced in a rule-info.
+  NOTE the resulting list doesn't contain duplicate elements.*)
+let rec base_types_of_ruleinfo acc : ruleinfo -> string list = function
+    NegPropRule t
+  | PosPropRule t -> base_types_of_trm acc t
+  | FreshRule (stp, t, _) ->
+    let acc' = base_types acc stp
+    in base_types_of_trm acc' t
+  | InstRule (stp, t1, t2) ->
+    let acc' = base_types_of_trm acc t1 in
+    let acc'' = base_types_of_trm acc' t2
+    in base_types acc'' stp
+  | Known (_, _, stps) ->
+    List.fold_right (fun x y -> base_types y x) stps acc
+  | ChoiceRule (t1, t2) ->
+    let acc' = base_types_of_trm acc t1
+    in base_types_of_trm acc' t2
+  | ConfrontationRule (_, _)
+  | MatingRule (_, _) -> acc
+
+(*List the base types that are referenced in a refutation.
+  NOTE the resulting list doesn't contain duplicate elements.*)
+let rec base_types_of_refut acc : refut -> string list = function
+    NegImpR (t1, t2, r) ->
+    let acc' = base_types_of_trm acc t1 in
+    let acc'' = base_types_of_trm acc' t2 in
+    base_types_of_refut acc'' r
+  | EqFR (stp1, stp2, t1, t2, r)
+  | NegEqFR (stp1, stp2, t1, t2, r) ->
+    let acc' = base_types_of_trm acc t1 in
+    let acc'' = base_types_of_trm acc' t2 in
+    let acc3 = base_types acc'' stp1 in
+    let acc4 = base_types acc3 stp2 in
+    base_types_of_refut acc4 r
+  | NegAllR (stp, t, _, r) ->
+    let acc' = base_types acc stp in
+    let acc'' = base_types_of_trm acc' t in
+    base_types_of_refut acc'' r
+  | EqOR (t1, t2, r1, r2)
+  | NegEqOR (t1, t2, r1, r2)
+  | ImpR (t1, t2, r1, r2) ->
+    let acc' = base_types_of_trm acc t1 in
+    let acc'' = base_types_of_trm acc' t2 in
+    let acc''' = base_types_of_refut acc'' r1 in
+    base_types_of_refut acc''' r2
+  | FalseR
+  | NegReflR
+  | AssumptionConflictR -> acc
+  | SearchR (cl, cr) ->
+    List.fold_right (fun c acc ->
+      let acc' =
+        List.fold_right (fun z acc ->
+          base_types_of_trm acc (Hashtbl.find atom_hash_rev (abs z)))
+          c acc in
+      try
+        base_types_of_ruleinfo acc' (cr c)
+      with Not_found -> acc') cl acc

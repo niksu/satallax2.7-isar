@@ -2164,3 +2164,49 @@ and print_ex_isar c a m bound =
 	  Printf.fprintf c "::"; print_stp_isar c a (*Hashtbl.create 0(*FIXME*)*) false;
     Printf.fprintf c ". ";
 	  trm_to_isar c m bound; Printf.fprintf c ")"
+
+(*List the constants that occur in a term, as name-type pairs.
+  NOTE the resulting list doesn't contain duplicate constants.*)
+let rec consts_of_trm acc : trm -> ctx = function
+    Name (name, stp) ->
+    begin
+    try
+      let stp' = List.assoc name acc
+      in
+        if stp' <> stp then failwith "Different types for same constant?"
+        else acc
+    with Not_found ->
+      (name, stp) :: acc
+    end
+  | Lam (_, trm) -> consts_of_trm acc trm
+  | Ap (trm1, trm2) ->
+    let acc' = consts_of_trm acc trm1
+    in consts_of_trm acc' trm2
+  | False | Imp | Forall _ | Eq _ | Choice _
+  | True | Neg | Or | And | Iff | Exists _
+  | DB (_, _) -> acc
+
+(*Produce a list of names (strings) of the base types that occur in a type.
+  NOTE the resulting list doesn't contain duplicate names.*)
+let rec base_types acc : stp -> string list = function
+   Base name ->
+   if List.mem name acc then acc
+   else name :: acc
+ | Prop -> acc
+ | Ar (stp1, stp2) ->
+   let acc' = base_types acc stp1
+   in base_types acc' stp2
+
+(*Lists the base types referenced in a term.
+  NOTE the resulting list doesn't contain duplicate elements.*)
+let rec base_types_of_trm acc : trm -> string list = function
+    Name (name, stp) -> base_types acc stp
+  | Lam (stp, trm) ->
+    let acc' = base_types acc stp
+    in base_types_of_trm acc' trm
+  | Ap (trm1, trm2) ->
+    let acc' = base_types_of_trm acc trm1
+    in base_types_of_trm acc' trm2
+  | Forall stp | Eq stp | Choice stp | Exists stp | DB (_, stp) ->
+    base_types acc stp
+  | False | Imp | True | Neg | Or | And | Iff -> acc

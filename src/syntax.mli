@@ -143,3 +143,7 @@ sig
   val top : t -> string
   val get : int -> 'a * 'b list -> 'b
 end
+
+val consts_of_trm : ctx -> trm -> ctx
+val base_types : string list -> stp -> string list
+val base_types_of_trm : string list -> trm -> string list

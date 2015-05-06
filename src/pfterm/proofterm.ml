@@ -510,7 +510,29 @@ let print_hocore c r =
     end
 
 (*** Chad - July 2012 - output proof script in tstp format. ***)
-let print_tstp c r =
+let print_tstp c (r : State.refut) =
   tstp := true;
-  print_coq_proofscript c r
 
+  (*To conform to the TSTP syntax spec, we first need to print the
+    signature: types and constants. Extract this from the refutation.*)
+  let consts = consts_of_refut [] r in
+  let types = base_types_of_refut [] r in
+
+  if (!verbosity > vold) then
+    begin
+      print_endline ("|consts| = " ^ string_of_int (List.length consts));
+      print_endline ("|types| = " ^ string_of_int (List.length types))
+    end;
+
+  List.map (fun basetype_name ->
+    output_string c
+      ("thf(ty" ^ basetype_name ^ ", type, " ^ basetype_name ^ " : $tType).\n"))
+   types;
+
+  List.map (fun (name, stp) ->
+    let tstp_name = tstpizename name in
+    output_string c ("thf(ty" ^ tstp_name ^ ", type, " ^ tstp_name ^ " : ");
+    Coq.print_stp_tstp stdout stp true;
+    output_string c (").\n"))
+   consts;
+  print_coq_proofscript c r

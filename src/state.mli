@@ -72,6 +72,7 @@ val require : string -> unit
 val get_fresh_name : stp -> string * trm
 
 val max_atom : unit -> int
+val atom_hash_rev : (int, trm) Hashtbl.t
 
 val assignedp : trm -> bool
 
@@ -254,3 +255,8 @@ val print_model : bool -> unit
 val onlynegnorm : trm -> trm
 val coqnorm : trm -> trm
 val normalize : trm -> trm
+
+val base_types_of_ruleinfo : string list -> ruleinfo -> string list
+val base_types_of_refut : string list -> refut -> string list
+val consts_of_ruleinfo : ctx -> ruleinfo -> ctx
+val consts_of_refut : ctx -> refut -> ctx
