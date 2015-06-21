@@ -1035,7 +1035,7 @@ let print_coqsig c =
                   trm_to_isar c (coqnorm t) (Syntax.Variables.make ());
 	                Printf.fprintf c "\"\n"
                 end
-              else if !mkproofterm = Some CoqScript then
+              else if !mkproofterm = Some CoqScript || !mkproofterm = Some TSTP then
                 (*have Syntax.trm but need Syntax.pretrm, so look it up*)
                 let pt = List.assoc x !coqsig_hyp in
 	                begin
